@@ -5,13 +5,20 @@
  * tocar cada página.
  */
 
+/**
+ * Dominio oficial y canónico de producción. Fuente única de verdad: cambiar
+ * aquí (o vía NEXT_PUBLIC_SITE_URL) propaga a metadata, sitemap, robots,
+ * Open Graph y JSON-LD sin tocar cada página.
+ */
+export const CANONICAL_URL = "https://iplibre.online";
+
 export const siteConfig = {
   name: "IPLibre",
   slogan: "Descubre tu IP y mide la velocidad de tu Internet",
   description:
     "IPLibre es una plataforma gratuita de diagnóstico de Internet: consulta tu IP pública, mide la velocidad de tu conexión y analiza DNS, WHOIS, RDAP, ASN y geolocalización de IP.",
   // La URL canónica se resuelve en tiempo de ejecución (ver getBaseUrl).
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://iplibre.vercel.app",
+  url: process.env.NEXT_PUBLIC_SITE_URL || CANONICAL_URL,
   locale: "es",
   themeColor: {
     light: "#0e7490",
@@ -48,8 +55,10 @@ export const siteConfig = {
  */
 export function getBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
-  const prod = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  if (prod) return `https://${prod}`;
+  // En producción, la canónica es siempre el dominio oficial (nunca el
+  // *.vercel.app), aunque falte la variable de entorno.
+  if (process.env.VERCEL_ENV === "production") return CANONICAL_URL;
+  // En deployments de preview usa la URL del deployment para poder navegar.
   const vercel = process.env.VERCEL_URL;
   if (vercel) return `https://${vercel}`;
   return "http://localhost:3000";

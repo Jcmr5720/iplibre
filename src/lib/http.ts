@@ -32,7 +32,7 @@ export async function fetchWithTimeout(
         ...init,
         signal: controller.signal,
         headers: {
-          "user-agent": "IPLibre/1.0 (+https://iplibre.vercel.app)",
+          "user-agent": "IPLibre/1.0 (+https://iplibre.online)",
           accept: "application/json",
           ...(init.headers || {}),
         },

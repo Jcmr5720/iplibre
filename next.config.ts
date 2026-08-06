@@ -49,6 +49,21 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  /**
+   * Consolidación de dominio hacia el canónico https://iplibre.online.
+   * La redirección www → apex la gestiona además Vercel a nivel de dominio;
+   * estas reglas cubren el dominio *.vercel.app y actúan como respaldo, sin
+   * afectar a preview deployments (que usan hosts con hash únicos).
+   */
+  async redirects() {
+    const legacyHosts = ["iplibre.vercel.app", "www.iplibre.online"];
+    return legacyHosts.map((host) => ({
+      source: "/:path*",
+      has: [{ type: "host" as const, value: host }],
+      destination: "https://iplibre.online/:path*",
+      permanent: true,
+    }));
+  },
 };
 
 export default nextConfig;
