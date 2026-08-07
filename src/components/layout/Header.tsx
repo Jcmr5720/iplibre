@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, ExternalLink, FileText, Menu, X } from "lucide-react";
@@ -21,6 +22,11 @@ export function Header() {
   const [megaOpen, setMegaOpen] = React.useState(false);
   const megaRef = React.useRef<HTMLDivElement>(null);
   const megaBtnRef = React.useRef<HTMLButtonElement>(null);
+  const menuBtnRef = React.useRef<HTMLButtonElement>(null);
+
+  // Solo renderiza el portal tras el montaje (evita desajustes de hidratación).
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
 
   // Cierra todo al navegar.
   React.useEffect(() => {
@@ -33,9 +39,10 @@ export function Header() {
     if (!drawerOpen && !megaOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        if (drawerOpen) menuBtnRef.current?.focus();
+        else if (megaOpen) megaBtnRef.current?.focus();
         setDrawerOpen(false);
         setMegaOpen(false);
-        megaBtnRef.current?.focus();
       }
     };
     document.addEventListener("keydown", onKey);
@@ -118,6 +125,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <button
+            ref={menuBtnRef}
             type="button"
             className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-foreground transition-colors hover:bg-muted md:hidden"
             aria-label="Abrir menú"
@@ -193,9 +201,18 @@ export function Header() {
         </div>
       )}
 
-      {/* Drawer móvil */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-[100] md:hidden" role="dialog" aria-modal="true" aria-label="Menú de navegación">
+      {/* Drawer móvil — renderizado en un portal a <body> para escapar del
+          contexto de apilamiento del header (backdrop-filter crea un bloque
+          contenedor que rompería `position: fixed`). */}
+      {mounted &&
+        drawerOpen &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[100] md:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menú de navegación"
+          >
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setDrawerOpen(false)}
@@ -203,7 +220,7 @@ export function Header() {
           />
           <div
             id="mobile-drawer"
-            className="absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col overflow-y-auto border-l border-border bg-background shadow-2xl"
+            className="absolute right-0 top-0 flex h-[100dvh] w-[86%] max-w-sm flex-col overflow-y-auto overscroll-contain border-l border-border bg-background shadow-2xl [padding-top:env(safe-area-inset-top)] [padding-bottom:env(safe-area-inset-bottom)]"
           >
             <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4">
               <Logo />
@@ -279,8 +296,9 @@ export function Header() {
               </div>
             </nav>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </header>
   );
 }

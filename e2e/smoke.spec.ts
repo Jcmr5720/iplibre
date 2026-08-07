@@ -62,6 +62,67 @@ test.describe("Navegación móvil (drawer)", () => {
   });
 });
 
+test.describe("Regresión del drawer móvil (bug de contexto de apilamiento)", () => {
+  test.use({ viewport: { width: 320, height: 568 } });
+
+  test("el drawer cubre toda la altura del viewport, no queda recortado tras el header", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    const drawer = page.locator("#mobile-drawer");
+    await expect(drawer).toBeVisible();
+    const box = await drawer.boundingBox();
+    expect(box).not.toBeNull();
+    // Antes del fix quedaba confinado a ~64px (altura del header).
+    expect(box!.height).toBeGreaterThan(500);
+    expect(box!.y).toBeLessThanOrEqual(1);
+  });
+
+  test("se renderiza en un portal a <body>, fuera del header", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    await expect(page.locator("#mobile-drawer")).toBeVisible();
+    const insideHeader = await page.locator("header #mobile-drawer").count();
+    expect(insideHeader).toBe(0);
+    const onBody = await page.evaluate(() => {
+      const dialog = document.getElementById("mobile-drawer")?.closest('[role="dialog"]');
+      return dialog?.parentElement === document.body;
+    });
+    expect(onBody).toBe(true);
+  });
+
+  test("cerrar el drawer restaura el scroll del body", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    await expect(page.locator("#mobile-drawer")).toBeVisible();
+    expect(await page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+    await page.getByRole("button", { name: "Cerrar menú" }).click();
+    await expect(page.locator("#mobile-drawer")).toBeHidden();
+    expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
+  });
+
+  test("navegar desde el drawer lo cierra y restaura el scroll", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    await page.locator("#mobile-drawer").getByRole("link", { name: "Mi IP", exact: true }).click();
+    await expect(page).toHaveURL(/\/mi-ip/);
+    await expect(page.locator("#mobile-drawer")).toBeHidden();
+    expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
+  });
+
+  for (const path of ["/", "/mi-ip", "/whois", "/dns-lookup", "/asn-lookup"]) {
+    test(`sin scroll horizontal en ${path} a 320px`, async ({ page }) => {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth > window.innerWidth,
+      );
+      expect(overflow).toBe(false);
+    });
+  }
+});
+
 test.describe("Nuevas páginas SEO", () => {
   for (const [path, heading] of [
     ["/cual-es-mi-ip", "¿Cuál es mi IP?"],
