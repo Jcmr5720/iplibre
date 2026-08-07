@@ -111,7 +111,17 @@ test.describe("Regresión del drawer móvil (bug de contexto de apilamiento)", (
     expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
   });
 
-  for (const path of ["/", "/mi-ip", "/whois", "/dns-lookup", "/asn-lookup"]) {
+  for (const path of [
+    "/",
+    "/mi-ip",
+    "/whois",
+    "/dns-lookup",
+    "/asn-lookup",
+    "/estado-web",
+    "/ssl-checker",
+    "/headers-seguridad",
+    "/test-ipv6",
+  ]) {
     test(`sin scroll horizontal en ${path} a 320px`, async ({ page }) => {
       await page.goto(path);
       await page.waitForLoadState("networkidle");
@@ -192,6 +202,66 @@ test.describe("Herramienta: DNS Lookup", () => {
     await page.getByPlaceholder("ejemplo.com").fill("cloudflare.com");
     await page.getByRole("button", { name: "Consultar" }).click();
     await expect(page.getByText(/Resultado para|Todos los registros/)).toBeVisible({ timeout: 20_000 });
+  });
+});
+
+test.describe("Herramientas de sitios web (nuevas)", () => {
+  test("las 4 nuevas herramientas cargan con su H1 y formulario/resultado", async ({ page }) => {
+    for (const [path, heading] of [
+      ["/estado-web", "Comprobar estado de una web"],
+      ["/ssl-checker", "Comprobar certificado SSL"],
+      ["/headers-seguridad", "Analizar headers de seguridad"],
+      ["/test-ipv6", "Test IPv6"],
+    ] as const) {
+      await page.goto(path);
+      await expect(page.getByRole("heading", { level: 1 })).toContainText(heading);
+    }
+  });
+
+  test("estado web: comprueba iplibre.online y muestra 'Funcionando'", async ({ page }) => {
+    await page.goto("/estado-web");
+    await page.getByPlaceholder(/google\.com/).fill("iplibre.online");
+    await page.getByRole("button", { name: "Comprobar" }).click();
+    await expect(page.getByText(/Funcionando/).first()).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("estado web: rechaza un esquema no permitido (SSRF/validación)", async ({ page }) => {
+    await page.goto("/estado-web");
+    await page.getByPlaceholder(/google\.com/).fill("file:///etc/passwd");
+    await page.getByRole("button", { name: "Comprobar" }).click();
+    await expect(page.getByRole("alert")).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("ssl checker: analiza iplibre.online y muestra días restantes", async ({ page }) => {
+    await page.goto("/ssl-checker");
+    await page.getByPlaceholder(/iplibre\.online/).fill("iplibre.online");
+    await page.getByRole("button", { name: "Analizar" }).click();
+    await expect(page.getByText("Días restantes")).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("headers de seguridad: muestra puntuación y descargo", async ({ page }) => {
+    await page.goto("/headers-seguridad");
+    await page.getByPlaceholder(/ejemplo\.com/).fill("iplibre.online");
+    await page.getByRole("button", { name: "Analizar" }).click();
+    await expect(page.getByText(/Puntuación:/)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/no constituye una auditoría completa/)).toBeVisible();
+  });
+
+  test("test ipv6: emite un veredicto de compatibilidad", async ({ page }) => {
+    await page.goto("/test-ipv6");
+    await expect(
+      page.getByText(/Compatibilidad IPv6|Solo IPv4|Solo IPv6|No se pudo determinar/),
+    ).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("las nuevas herramientas aparecen en /herramientas agrupadas", async ({ page }) => {
+    await page.goto("/herramientas");
+    await expect(
+      page.locator("#contenido").getByRole("heading", { name: "Sitios web" }),
+    ).toBeVisible();
+    for (const label of ["Estado web", "SSL Checker", "Headers de seguridad", "Test IPv6"]) {
+      await expect(page.getByRole("link", { name: label, exact: true }).first()).toBeVisible();
+    }
   });
 });
 

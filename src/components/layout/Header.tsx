@@ -145,7 +145,7 @@ export function Header() {
           ref={megaRef}
           className="absolute inset-x-0 top-16 hidden border-b border-border bg-background/98 shadow-lg backdrop-blur-md md:block"
         >
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-[repeat(4,1fr)_1.1fr]">
+          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:grid-cols-2 lg:grid-cols-3">
             {menuGroups.map((group) => (
               <div key={group.title}>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

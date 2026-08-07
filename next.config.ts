@@ -19,7 +19,9 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.adtrafficquality.google",
   "font-src 'self' data:",
-  "connect-src 'self' https://speed.cloudflare.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.adtrafficquality.google",
+  // connect-src: incluye endpoints IPv4/IPv6 (icanhazip) para el Test IPv6,
+  // que mide la conectividad real del visitante desde el navegador.
+  "connect-src 'self' https://speed.cloudflare.com https://ipv4.icanhazip.com https://ipv6.icanhazip.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.adtrafficquality.google",
   // frame-src: los anuncios de AdSense se renderizan en iframes de Google.
   "frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://*.adtrafficquality.google",
   "frame-ancestors 'none'",

@@ -31,6 +31,14 @@ export const asnQuerySchema = z.object({
   query: z.string().trim().min(1).max(45),
 });
 
+export const urlQuerySchema = z.object({
+  url: z.string().trim().min(1).max(2048),
+});
+
+export const hostQuerySchema = z.object({
+  host: z.string().trim().min(1).max(253),
+});
+
 export const contactSchema = z.object({
   name: z.string().trim().min(2, "Introduce tu nombre").max(120),
   email: z.string().trim().email("Correo no válido").max(254),

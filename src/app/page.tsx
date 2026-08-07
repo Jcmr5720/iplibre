@@ -68,7 +68,8 @@ export default function Home() {
           <div>
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Todas las herramientas</h2>
             <p className="mt-2 text-muted-foreground">
-              Nueve utilidades de red, cada una con consultas reales y resultados verificables.
+              Diagnóstico de tu conexión y de sitios web, con consultas reales y resultados
+              verificables.
             </p>
           </div>
           <Link href="/herramientas" className="text-sm font-medium text-primary hover:underline">

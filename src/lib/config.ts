@@ -73,22 +73,36 @@ export function getBaseUrl(): string {
   return "http://localhost:3000";
 }
 
+export type ToolCategory = "conexion" | "red" | "web";
+
 export type NavItem = {
   href: string;
   label: string;
   description?: string;
+  category?: ToolCategory;
 };
 
 export const tools: NavItem[] = [
-  { href: "/mi-ip", label: "Mi IP", description: "Tu dirección IP pública y datos de conexión" },
-  { href: "/test-de-velocidad", label: "Test de velocidad", description: "Descarga, subida, ping y jitter reales" },
-  { href: "/diagnostico-de-internet", label: "Diagnóstico", description: "Chequeo integral de tu conexión" },
-  { href: "/geolocalizar-ip", label: "Geolocalizar IP", description: "Ubicación aproximada de una IP" },
-  { href: "/whois", label: "WHOIS / RDAP", description: "Datos de dominios, IP y ASN" },
-  { href: "/dns-lookup", label: "DNS Lookup", description: "Registros A, AAAA, MX, TXT y más" },
-  { href: "/propagacion-dns", label: "Propagación DNS", description: "Compara resolutores públicos" },
-  { href: "/asn-lookup", label: "ASN Lookup", description: "Sistemas autónomos y prefijos" },
-  { href: "/reverse-dns", label: "Reverse DNS", description: "Registro PTR de una IP" },
+  { href: "/mi-ip", label: "Mi IP", description: "Tu dirección IP pública y datos de conexión", category: "conexion" },
+  { href: "/test-de-velocidad", label: "Test de velocidad", description: "Descarga, subida, ping y jitter reales", category: "conexion" },
+  { href: "/diagnostico-de-internet", label: "Diagnóstico", description: "Chequeo integral de tu conexión", category: "conexion" },
+  { href: "/test-ipv6", label: "Test IPv6", description: "Comprueba si tu conexión usa IPv6", category: "conexion" },
+  { href: "/geolocalizar-ip", label: "Geolocalizar IP", description: "Ubicación aproximada de una IP", category: "red" },
+  { href: "/whois", label: "WHOIS / RDAP", description: "Datos de dominios, IP y ASN", category: "red" },
+  { href: "/dns-lookup", label: "DNS Lookup", description: "Registros A, AAAA, MX, TXT y más", category: "red" },
+  { href: "/propagacion-dns", label: "Propagación DNS", description: "Compara resolutores públicos", category: "red" },
+  { href: "/asn-lookup", label: "ASN Lookup", description: "Sistemas autónomos y prefijos", category: "red" },
+  { href: "/reverse-dns", label: "Reverse DNS", description: "Registro PTR de una IP", category: "red" },
+  { href: "/estado-web", label: "Estado web", description: "Comprueba si una web está disponible", category: "web" },
+  { href: "/ssl-checker", label: "SSL Checker", description: "Analiza el certificado HTTPS de un dominio", category: "web" },
+  { href: "/headers-seguridad", label: "Headers de seguridad", description: "Qué protecciones HTTP usa una web", category: "web" },
+];
+
+/** Herramientas agrupadas por categoría, para el menú y /herramientas. */
+export const toolCategories: { id: ToolCategory; title: string; items: NavItem[] }[] = [
+  { id: "conexion", title: "Mi conexión", items: tools.filter((t) => t.category === "conexion") },
+  { id: "red", title: "Dominios y red", items: tools.filter((t) => t.category === "red") },
+  { id: "web", title: "Sitios web", items: tools.filter((t) => t.category === "web") },
 ];
 
 /** Guías y páginas informativas ("Aprender"). Distintas de las herramientas. */
@@ -132,14 +146,7 @@ export const relatedApps: RelatedApp[] = [
 export type MenuGroup = { title: string; items: NavItem[] };
 
 export const menuGroups: MenuGroup[] = [
-  {
-    title: "Herramientas de Internet",
-    items: tools.slice(0, 3),
-  },
-  {
-    title: "Análisis de red",
-    items: tools.slice(3),
-  },
+  ...toolCategories.map((c) => ({ title: c.title, items: c.items })),
   {
     title: "Aprender",
     items: learnLinks,
@@ -156,12 +163,16 @@ export const menuGroups: MenuGroup[] = [
 
 export const footerNav: { title: string; items: NavItem[] }[] = [
   {
-    title: "Herramientas",
-    items: tools.slice(0, 5),
+    title: "Mi conexión",
+    items: tools.filter((t) => t.category === "conexion"),
   },
   {
-    title: "Más herramientas",
-    items: tools.slice(5),
+    title: "Dominios y red",
+    items: tools.filter((t) => t.category === "red"),
+  },
+  {
+    title: "Sitios web",
+    items: tools.filter((t) => t.category === "web"),
   },
   {
     title: "Recursos",
