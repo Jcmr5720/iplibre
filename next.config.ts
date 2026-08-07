@@ -15,7 +15,7 @@ import type { NextConfig } from "next";
 const csp = [
   "default-src 'self'",
   // Google AdSense: dominios necesarios para el script oficial y los anuncios.
-  "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.googletagservices.com",
+  "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.googletagservices.com https://*.adtrafficquality.google",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.adtrafficquality.google",
   "font-src 'self' data:",
