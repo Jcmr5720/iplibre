@@ -7,6 +7,8 @@ import {
   footerNav,
   verification,
   CANONICAL_URL,
+  searchTools,
+  aboutLinks,
 } from "./config";
 
 describe("verificaciones (Search Console / AdSense)", () => {
@@ -68,6 +70,47 @@ describe("enlaces de aprendizaje", () => {
     for (const h of ["/que-es-mi-ip", "/que-es-dns", "/que-es-el-ping", "/que-es-el-jitter", "/ipv4-vs-ipv6"]) {
       expect(hrefs).toContain(h);
     }
+  });
+});
+
+describe("buscador de herramientas (searchTools)", () => {
+  const hrefs = (q: string) => searchTools(q).map((t) => t.href);
+
+  it("sin consulta devuelve todas las herramientas", () => {
+    expect(searchTools("")).toHaveLength(tools.length);
+  });
+
+  it("'DNS' devuelve las herramientas de DNS", () => {
+    const r = hrefs("dns");
+    expect(r).toEqual(expect.arrayContaining(["/dns-lookup", "/propagacion-dns", "/reverse-dns"]));
+    expect(r).not.toContain("/mi-ip");
+  });
+
+  it("'IP' incluye Mi IP, Geolocalizar y Test IPv6", () => {
+    const r = hrefs("ip");
+    expect(r).toEqual(expect.arrayContaining(["/mi-ip", "/geolocalizar-ip", "/test-ipv6"]));
+  });
+
+  it("busca por sinónimos: 'certificado' → SSL, 'web caida' → estado web", () => {
+    expect(hrefs("certificado")).toContain("/ssl-checker");
+    expect(hrefs("web caida")).toContain("/estado-web");
+  });
+
+  it("es insensible a acentos y mayúsculas", () => {
+    expect(hrefs("PROPAGACIÓN")).toContain("/propagacion-dns");
+  });
+
+  it("'seguridad' devuelve headers y SSL", () => {
+    const r = hrefs("seguridad");
+    expect(r).toEqual(expect.arrayContaining(["/headers-seguridad", "/ssl-checker"]));
+  });
+});
+
+describe("menú secundario (aboutLinks)", () => {
+  it("incluye Acerca de y Contacto", () => {
+    const hrefs = aboutLinks.map((l) => l.href);
+    expect(hrefs).toContain("/acerca-de");
+    expect(hrefs).toContain("/contacto");
   });
 });
 

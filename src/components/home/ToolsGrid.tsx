@@ -1,39 +1,11 @@
 import Link from "next/link";
-import {
-  Activity,
-  ArrowRight,
-  Gauge,
-  Globe2,
-  LockKeyhole,
-  MapPin,
-  Network,
-  ScanSearch,
-  Server,
-  Shield,
-  Stethoscope,
-  Repeat,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { tools, toolCategories, type NavItem } from "@/lib/config";
+import { TOOL_ICONS, FALLBACK_TOOL_ICON } from "@/components/nav/toolIcons";
 import { cn } from "@/lib/utils";
 
-const ICONS: Record<string, React.ElementType> = {
-  "/mi-ip": Globe2,
-  "/test-de-velocidad": Gauge,
-  "/diagnostico-de-internet": Stethoscope,
-  "/test-ipv6": Network,
-  "/geolocalizar-ip": MapPin,
-  "/whois": ScanSearch,
-  "/dns-lookup": Server,
-  "/propagacion-dns": Repeat,
-  "/asn-lookup": Network,
-  "/reverse-dns": Server,
-  "/estado-web": Activity,
-  "/ssl-checker": LockKeyhole,
-  "/headers-seguridad": Shield,
-};
-
 function ToolCard({ tool }: { tool: NavItem }) {
-  const Icon = ICONS[tool.href] ?? Globe2;
+  const Icon = TOOL_ICONS[tool.href] ?? FALLBACK_TOOL_ICON;
   return (
     <Link
       href={tool.href}

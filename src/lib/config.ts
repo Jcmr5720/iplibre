@@ -80,22 +80,24 @@ export type NavItem = {
   label: string;
   description?: string;
   category?: ToolCategory;
+  /** Sinónimos y términos de búsqueda para el buscador de herramientas. */
+  keywords?: string[];
 };
 
 export const tools: NavItem[] = [
-  { href: "/mi-ip", label: "Mi IP", description: "Tu dirección IP pública y datos de conexión", category: "conexion" },
-  { href: "/test-de-velocidad", label: "Test de velocidad", description: "Descarga, subida, ping y jitter reales", category: "conexion" },
-  { href: "/diagnostico-de-internet", label: "Diagnóstico", description: "Chequeo integral de tu conexión", category: "conexion" },
-  { href: "/test-ipv6", label: "Test IPv6", description: "Comprueba si tu conexión usa IPv6", category: "conexion" },
-  { href: "/geolocalizar-ip", label: "Geolocalizar IP", description: "Ubicación aproximada de una IP", category: "red" },
-  { href: "/whois", label: "WHOIS / RDAP", description: "Datos de dominios, IP y ASN", category: "red" },
-  { href: "/dns-lookup", label: "DNS Lookup", description: "Registros A, AAAA, MX, TXT y más", category: "red" },
-  { href: "/propagacion-dns", label: "Propagación DNS", description: "Compara resolutores públicos", category: "red" },
-  { href: "/asn-lookup", label: "ASN Lookup", description: "Sistemas autónomos y prefijos", category: "red" },
-  { href: "/reverse-dns", label: "Reverse DNS", description: "Registro PTR de una IP", category: "red" },
-  { href: "/estado-web", label: "Estado web", description: "Comprueba si una web está disponible", category: "web" },
-  { href: "/ssl-checker", label: "SSL Checker", description: "Analiza el certificado HTTPS de un dominio", category: "web" },
-  { href: "/headers-seguridad", label: "Headers de seguridad", description: "Qué protecciones HTTP usa una web", category: "web" },
+  { href: "/mi-ip", label: "Mi IP", description: "Consulta tu dirección IP pública.", category: "conexion", keywords: ["ip", "ip publica", "mi direccion", "ipv4", "cual es mi ip", "direccion ip"] },
+  { href: "/test-de-velocidad", label: "Test de velocidad", description: "Mide descarga, subida y latencia.", category: "conexion", keywords: ["velocidad", "speed test", "descarga", "subida", "ping", "jitter", "mbps", "internet", "banda ancha"] },
+  { href: "/diagnostico-de-internet", label: "Diagnóstico", description: "Analiza el estado de tu conexión.", category: "conexion", keywords: ["diagnostico", "conexion", "estado", "internet", "problemas", "chequeo"] },
+  { href: "/test-ipv6", label: "Test IPv6", description: "Comprueba compatibilidad IPv6.", category: "conexion", keywords: ["ipv6", "ip", "compatibilidad", "protocolo", "ipv4 vs ipv6"] },
+  { href: "/geolocalizar-ip", label: "Geolocalizar IP", description: "Ubicación aproximada de una IP.", category: "red", keywords: ["ip", "geolocalizacion", "ubicacion", "geo", "localizar", "pais", "ciudad", "mapa"] },
+  { href: "/whois", label: "WHOIS / RDAP", description: "Datos de dominios, IP y ASN.", category: "red", keywords: ["whois", "rdap", "dominio", "registro", "propietario", "titular"] },
+  { href: "/dns-lookup", label: "DNS Lookup", description: "Registros A, AAAA, MX, TXT y más.", category: "red", keywords: ["dns", "registros", "lookup", "resolver", "mx", "txt", "nameserver", "dominio"] },
+  { href: "/propagacion-dns", label: "Propagación DNS", description: "Compara resolutores públicos.", category: "red", keywords: ["dns", "propagacion", "resolutores", "cambios dns", "global", "dominio"] },
+  { href: "/asn-lookup", label: "ASN Lookup", description: "Sistemas autónomos y prefijos.", category: "red", keywords: ["asn", "sistema autonomo", "prefijos", "bgp", "operador", "red"] },
+  { href: "/reverse-dns", label: "Reverse DNS", description: "Registro PTR de una IP.", category: "red", keywords: ["dns", "reverse", "ptr", "inverso", "ip", "hostname"] },
+  { href: "/estado-web", label: "Estado web", description: "Comprueba si una web está disponible.", category: "web", keywords: ["web caida", "estado", "disponible", "up down", "http", "sitio", "monitor", "caida"] },
+  { href: "/ssl-checker", label: "SSL Checker", description: "Comprueba el certificado HTTPS de un dominio.", category: "web", keywords: ["ssl", "tls", "certificado", "https", "seguridad", "caducidad", "cifrado"] },
+  { href: "/headers-seguridad", label: "Headers de seguridad", description: "Qué protecciones HTTP usa una web.", category: "web", keywords: ["headers", "cabeceras", "seguridad", "csp", "hsts", "http", "proteccion"] },
 ];
 
 /** Herramientas agrupadas por categoría, para el menú y /herramientas. */
@@ -105,6 +107,31 @@ export const toolCategories: { id: ToolCategory; title: string; items: NavItem[]
   { id: "web", title: "Sitios web", items: tools.filter((t) => t.category === "web") },
 ];
 
+/** Normaliza texto para búsqueda: minúsculas y sin acentos. */
+function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .trim();
+}
+
+/**
+ * Buscador local de herramientas. Coincide por nombre, descripción y
+ * sinónimos (keywords). Sin backend: filtra la fuente central `tools`.
+ */
+export function searchTools(query: string): NavItem[] {
+  const q = normalize(query);
+  if (!q) return tools;
+  const terms = q.split(/\s+/).filter(Boolean);
+  return tools.filter((t) => {
+    const haystack = normalize(
+      [t.label, t.description ?? "", ...(t.keywords ?? [])].join(" "),
+    );
+    return terms.every((term) => haystack.includes(term));
+  });
+}
+
 /** Guías y páginas informativas ("Aprender"). Distintas de las herramientas. */
 export const learnLinks: NavItem[] = [
   { href: "/que-es-mi-ip", label: "¿Qué es mi IP?", description: "Qué es una dirección IP y para qué sirve" },
@@ -113,6 +140,14 @@ export const learnLinks: NavItem[] = [
   { href: "/que-es-el-jitter", label: "¿Qué es el jitter?", description: "La estabilidad de tu conexión" },
   { href: "/ipv4-vs-ipv6", label: "IPv4 vs IPv6", description: "Diferencias entre ambos protocolos" },
   { href: "/preguntas-frecuentes", label: "Preguntas frecuentes", description: "Dudas habituales sobre red e Internet" },
+];
+
+/**
+ * Enlaces institucionales de IPLibre para el menú secundario ("Más").
+ */
+export const aboutLinks: NavItem[] = [
+  { href: "/acerca-de", label: "Acerca de", description: "Qué es IPLibre y cómo funciona" },
+  { href: "/contacto", label: "Contacto", description: "Escríbenos tus dudas o sugerencias" },
 ];
 
 /**

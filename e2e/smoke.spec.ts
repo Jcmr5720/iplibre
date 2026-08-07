@@ -9,28 +9,99 @@ test.describe("Navegación e inicio", () => {
     await expect(page.getByRole("link", { name: "Iniciar test de velocidad" })).toBeVisible();
   });
 
-  test("el mega-menú de escritorio abre y lleva a todas las herramientas", async ({ page }) => {
+  test("la categoría 'Mi conexión' abre y muestra sus 4 herramientas", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: "Herramientas" }).click();
-    const mega = page.locator("#mega-menu");
+    await page.getByRole("button", { name: "Mi conexión" }).click();
+    const menu = page.locator("#menu-conexion");
+    await expect(menu).toBeVisible();
+    for (const href of ["/mi-ip", "/test-de-velocidad", "/diagnostico-de-internet", "/test-ipv6"]) {
+      await expect(menu.locator(`a[href="${href}"]`)).toBeVisible();
+    }
+  });
+
+  test("'Dominios y red' y 'Sitios web' abren sus dropdowns", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Dominios y red" }).click();
+    await expect(page.locator("#menu-red")).toBeVisible();
+    await expect(page.locator('#menu-red a[href="/whois"]')).toBeVisible();
+
+    await page.getByRole("button", { name: "Sitios web" }).click();
+    await expect(page.locator("#menu-web")).toBeVisible();
+    await expect(page.locator('#menu-web a[href="/ssl-checker"]')).toBeVisible();
+  });
+
+  test("solo un dropdown puede estar abierto a la vez", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Mi conexión" }).click();
+    await expect(page.locator("#menu-conexion")).toBeVisible();
+    await page.getByRole("button", { name: "Dominios y red" }).click();
+    await expect(page.locator("#menu-conexion")).toBeHidden();
+    await expect(page.locator("#menu-red")).toBeVisible();
+  });
+
+  test("'Todas las herramientas' abre el mega-menú con las 13 herramientas", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Todas las herramientas" }).click();
+    const mega = page.locator("#menu-todas");
     await expect(mega).toBeVisible();
-    await mega.getByRole("link", { name: "Todas las herramientas" }).click();
-    await expect(page).toHaveURL(/\/herramientas/);
-    await expect(page.getByRole("heading", { name: "Todas las herramientas" })).toBeVisible();
+    await expect(mega.getByPlaceholder("Buscar una herramienta…")).toBeVisible();
+    await expect(mega.locator('a[href^="/"]')).toHaveCount(13); // 13 herramientas internas
+  });
+
+  test("el buscador filtra por 'DNS' y devuelve solo herramientas DNS", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Todas las herramientas" }).click();
+    const mega = page.locator("#menu-todas");
+    await mega.getByPlaceholder("Buscar una herramienta…").fill("dns");
+    for (const href of ["/dns-lookup", "/propagacion-dns", "/reverse-dns"]) {
+      await expect(mega.locator(`a[href="${href}"]`)).toBeVisible();
+    }
+    await expect(mega.locator('a[href="/mi-ip"]')).toHaveCount(0);
+    await expect(mega.locator('a[href^="/"]')).toHaveCount(3);
+  });
+
+  test("el buscador filtra por 'certificado' y devuelve SSL Checker", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Todas las herramientas" }).click();
+    const mega = page.locator("#menu-todas");
+    await mega.getByPlaceholder("Buscar una herramienta…").fill("certificado");
+    await expect(mega.locator('a[href="/ssl-checker"]')).toBeVisible();
+    await expect(mega.locator('a[href="/dns-lookup"]')).toHaveCount(0);
   });
 
   test("el mega-menú se cierra con Escape", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: "Herramientas" }).click();
-    await expect(page.locator("#mega-menu")).toBeVisible();
+    await page.getByRole("button", { name: "Todas las herramientas" }).click();
+    await expect(page.locator("#menu-todas")).toBeVisible();
     await page.keyboard.press("Escape");
-    await expect(page.locator("#mega-menu")).toBeHidden();
+    await expect(page.locator("#menu-todas")).toBeHidden();
   });
 
-  test("el mega-menú enlaza a PDFLibre (otra aplicación)", async ({ page }) => {
+  test("un clic fuera cierra el dropdown", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: "Herramientas" }).click();
-    const link = page.locator("#mega-menu").getByRole("link", { name: /PDFLibre/ });
+    await page.getByRole("button", { name: "Mi conexión" }).click();
+    await expect(page.locator("#menu-conexion")).toBeVisible();
+    await page.getByRole("heading", { level: 1 }).click();
+    await expect(page.locator("#menu-conexion")).toBeHidden();
+  });
+
+  test("el menú 'Más' contiene Recursos, IPLibre y PDFLibre", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /Más:/ }).click();
+    const menu = page.locator("#menu-mas");
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole("link", { name: "¿Qué es DNS?" })).toBeVisible();
+    await expect(menu.getByRole("link", { name: "Acerca de" })).toBeVisible();
+    const pdf = menu.getByRole("link", { name: /PDFLibre/ });
+    await expect(pdf).toHaveAttribute("href", "https://pdflibre.app");
+    await expect(pdf).toHaveAttribute("target", "_blank");
+    await expect(pdf).toHaveAttribute("rel", /noopener/);
+  });
+
+  test("el mega-menú enlaza a PDFLibre en su barra inferior", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Todas las herramientas" }).click();
+    const link = page.locator("#menu-todas").getByRole("link", { name: /PDFLibre/ });
     await expect(link).toHaveAttribute("href", "https://pdflibre.app");
     await expect(link).toHaveAttribute("target", "_blank");
     await expect(link).toHaveAttribute("rel", /noopener/);
@@ -54,11 +125,33 @@ test.describe("Navegación móvil (drawer)", () => {
     await expect(drawer).toBeHidden();
   });
 
-  test("navega a una herramienta desde el drawer", async ({ page }) => {
+  test("las categorías se expanden y colapsan (acordeón)", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    const drawer = page.locator("#mobile-drawer");
+    // "Mi conexión" arranca expandida.
+    await expect(drawer.getByRole("link", { name: "Mi IP", exact: true })).toBeVisible();
+    // Expandir "Dominios y red".
+    await drawer.getByRole("button", { name: "Dominios y red" }).click();
+    await expect(drawer.getByRole("link", { name: "WHOIS / RDAP" })).toBeVisible();
+  });
+
+  test("navega a una herramienta desde el drawer y lo cierra", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: "Abrir menú" }).click();
     await page.locator("#mobile-drawer").getByRole("link", { name: "Test de velocidad" }).click();
     await expect(page).toHaveURL(/\/test-de-velocidad/);
+    await expect(page.locator("#mobile-drawer")).toBeHidden();
+  });
+
+  test("'Todas las herramientas' del drawer lleva al catálogo", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    await page
+      .locator("#mobile-drawer")
+      .getByRole("link", { name: "Todas las herramientas" })
+      .click();
+    await expect(page).toHaveURL(/\/herramientas/);
   });
 });
 
