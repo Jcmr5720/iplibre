@@ -88,6 +88,37 @@ export function BreadcrumbsJsonLd({ items }: { items: { name: string; path: stri
   );
 }
 
+export function ArticleJsonLd({
+  headline,
+  description,
+  path,
+}: {
+  headline: string;
+  description: string;
+  path: string;
+}) {
+  const base = getBaseUrl();
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline,
+        description,
+        inLanguage: "es",
+        mainEntityOfPage: { "@type": "WebPage", "@id": `${base}${path}` },
+        author: { "@type": "Organization", name: siteConfig.name, url: base },
+        publisher: {
+          "@type": "Organization",
+          name: siteConfig.name,
+          url: base,
+          logo: { "@type": "ImageObject", url: `${base}/icon.svg` },
+        },
+      }}
+    />
+  );
+}
+
 export function FaqJsonLd({ items }: { items: { q: string; a: string }[] }) {
   return (
     <JsonLd

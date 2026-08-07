@@ -12,6 +12,15 @@
  */
 export const CANONICAL_URL = "https://iplibre.online";
 
+/**
+ * Verificaciones de propiedad y publicidad. Fuente única de verdad para que la
+ * metadata (Google Search Console) y ads.txt no queden desincronizados.
+ */
+export const verification = {
+  google: "6oiOkE6VjEMaCmA9xY_axcB5dWIl35YioO7gomecuqI",
+  adsenseClient: "ca-pub-1569989907195059",
+} as const;
+
 export const siteConfig = {
   name: "IPLibre",
   slogan: "Descubre tu IP y mide la velocidad de tu Internet",
@@ -82,6 +91,69 @@ export const tools: NavItem[] = [
   { href: "/reverse-dns", label: "Reverse DNS", description: "Registro PTR de una IP" },
 ];
 
+/** Guías y páginas informativas ("Aprender"). Distintas de las herramientas. */
+export const learnLinks: NavItem[] = [
+  { href: "/que-es-mi-ip", label: "¿Qué es mi IP?", description: "Qué es una dirección IP y para qué sirve" },
+  { href: "/que-es-dns", label: "¿Qué es DNS?", description: "La guía telefónica de Internet, explicada" },
+  { href: "/que-es-el-ping", label: "¿Qué es el ping?", description: "Latencia y por qué importa" },
+  { href: "/que-es-el-jitter", label: "¿Qué es el jitter?", description: "La estabilidad de tu conexión" },
+  { href: "/ipv4-vs-ipv6", label: "IPv4 vs IPv6", description: "Diferencias entre ambos protocolos" },
+  { href: "/preguntas-frecuentes", label: "Preguntas frecuentes", description: "Dudas habituales sobre red e Internet" },
+];
+
+/**
+ * Otras aplicaciones del ecosistema. Configuración reutilizable: añadir una
+ * nueva app (SólidoLibre, etc.) es solo agregar un objeto aquí; el menú y el
+ * footer se actualizan solos. No confundir con herramientas internas.
+ */
+export type RelatedApp = {
+  name: string;
+  href: string;
+  tagline: string;
+  description: string;
+  cta: string;
+};
+
+export const relatedApps: RelatedApp[] = [
+  {
+    name: "PDFLibre",
+    href: "https://pdflibre.app",
+    tagline: "Todas tus herramientas PDF, gratis y desde el navegador.",
+    description:
+      "Edita, convierte, organiza y firma tus PDF directamente desde el navegador, sin instalar nada.",
+    cta: "Explorar PDFLibre",
+  },
+];
+
+/**
+ * Estructura del mega-menú / drawer de navegación. Agrupa las rutas por
+ * intención para no saturar el header con enlaces sueltos.
+ */
+export type MenuGroup = { title: string; items: NavItem[] };
+
+export const menuGroups: MenuGroup[] = [
+  {
+    title: "Herramientas de Internet",
+    items: tools.slice(0, 3),
+  },
+  {
+    title: "Análisis de red",
+    items: tools.slice(3),
+  },
+  {
+    title: "Aprender",
+    items: learnLinks,
+  },
+  {
+    title: "IPLibre",
+    items: [
+      { href: "/herramientas", label: "Todas las herramientas" },
+      { href: "/acerca-de", label: "Acerca de" },
+      { href: "/contacto", label: "Contacto" },
+    ],
+  },
+];
+
 export const footerNav: { title: string; items: NavItem[] }[] = [
   {
     title: "Herramientas",
@@ -92,12 +164,13 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
     items: tools.slice(5),
   },
   {
-    title: "IPLibre",
+    title: "Recursos",
     items: [
-      { href: "/herramientas", label: "Todas las herramientas" },
+      { href: "/que-es-mi-ip", label: "¿Qué es mi IP?" },
+      { href: "/que-es-dns", label: "¿Qué es DNS?" },
+      { href: "/ipv4-vs-ipv6", label: "IPv4 vs IPv6" },
       { href: "/preguntas-frecuentes", label: "Preguntas frecuentes" },
       { href: "/acerca-de", label: "Acerca de" },
-      { href: "/contacto", label: "Contacto" },
     ],
   },
   {
@@ -107,6 +180,7 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
       { href: "/privacidad", label: "Privacidad" },
       { href: "/cookies", label: "Cookies" },
       { href: "/aviso-legal", label: "Aviso legal" },
+      { href: "/contacto", label: "Contacto" },
     ],
   },
 ];

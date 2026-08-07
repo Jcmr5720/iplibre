@@ -9,11 +9,102 @@ test.describe("Navegación e inicio", () => {
     await expect(page.getByRole("link", { name: "Iniciar test de velocidad" })).toBeVisible();
   });
 
-  test("navega desde la portada a las herramientas", async ({ page }) => {
+  test("el mega-menú de escritorio abre y lleva a todas las herramientas", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Herramientas", exact: true }).first().click();
+    await page.getByRole("button", { name: "Herramientas" }).click();
+    const mega = page.locator("#mega-menu");
+    await expect(mega).toBeVisible();
+    await mega.getByRole("link", { name: "Todas las herramientas" }).click();
     await expect(page).toHaveURL(/\/herramientas/);
     await expect(page.getByRole("heading", { name: "Todas las herramientas" })).toBeVisible();
+  });
+
+  test("el mega-menú se cierra con Escape", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Herramientas" }).click();
+    await expect(page.locator("#mega-menu")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#mega-menu")).toBeHidden();
+  });
+
+  test("el mega-menú enlaza a PDFLibre (otra aplicación)", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Herramientas" }).click();
+    const link = page.locator("#mega-menu").getByRole("link", { name: /PDFLibre/ });
+    await expect(link).toHaveAttribute("href", "https://pdflibre.app");
+    await expect(link).toHaveAttribute("target", "_blank");
+    await expect(link).toHaveAttribute("rel", /noopener/);
+  });
+});
+
+test.describe("Navegación móvil (drawer)", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("abre el drawer, muestra secciones y cierra con Escape", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    const drawer = page.locator("#mobile-drawer");
+    await expect(drawer).toBeVisible();
+    await expect(drawer.getByText("Otras aplicaciones")).toBeVisible();
+    await expect(drawer.getByRole("link", { name: /PDFLibre/ })).toHaveAttribute(
+      "href",
+      "https://pdflibre.app",
+    );
+    await page.keyboard.press("Escape");
+    await expect(drawer).toBeHidden();
+  });
+
+  test("navega a una herramienta desde el drawer", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Abrir menú" }).click();
+    await page.locator("#mobile-drawer").getByRole("link", { name: "Test de velocidad" }).click();
+    await expect(page).toHaveURL(/\/test-de-velocidad/);
+  });
+});
+
+test.describe("Nuevas páginas SEO", () => {
+  for (const [path, heading] of [
+    ["/cual-es-mi-ip", "¿Cuál es mi IP?"],
+    ["/medir-velocidad-internet", "Medir la velocidad de tu Internet"],
+    ["/test-de-velocidad-wifi", "Test de velocidad Wi-Fi"],
+    ["/comprobar-dns", "Comprobar DNS de un dominio"],
+    ["/que-es-mi-ip", "¿Qué es mi IP?"],
+    ["/que-es-dns", "¿Qué es DNS?"],
+    ["/que-es-el-ping", "¿Qué es el ping?"],
+    ["/que-es-el-jitter", "¿Qué es el jitter?"],
+    ["/ipv4-vs-ipv6", "IPv4 vs IPv6"],
+  ] as const) {
+    test(`${path} carga con su H1 único`, async ({ page }) => {
+      await page.goto(path);
+      await expect(page.getByRole("heading", { level: 1 })).toContainText(heading);
+    });
+  }
+
+  test("las variantes duplicadas redirigen a su página canónica", async ({ page }) => {
+    await page.goto("/mi-ip-publica");
+    await expect(page).toHaveURL(/\/cual-es-mi-ip/);
+    await page.goto("/test-de-internet");
+    await expect(page).toHaveURL(/\/medir-velocidad-internet/);
+  });
+});
+
+test.describe("SEO / verificaciones", () => {
+  test("el HTML incluye las metas de AdSense y Search Console", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('meta[name="google-adsense-account"]')).toHaveAttribute(
+      "content",
+      "ca-pub-1569989907195059",
+    );
+    await expect(page.locator('meta[name="google-site-verification"]')).toHaveAttribute(
+      "content",
+      "6oiOkE6VjEMaCmA9xY_axcB5dWIl35YioO7gomecuqI",
+    );
+  });
+
+  test("ads.txt responde 200 con el publisher correcto", async ({ page }) => {
+    const res = await page.goto("/ads.txt");
+    expect(res?.status()).toBe(200);
+    expect(await page.locator("body").innerText()).toContain("pub-1569989907195059");
   });
 });
 

@@ -4,6 +4,7 @@ import { Container } from "@/components/layout/PageShell";
 import { ButtonLink } from "@/components/ui/Button";
 import { HeroIp } from "@/components/home/HeroIp";
 import { ToolsGrid } from "@/components/home/ToolsGrid";
+import { RelatedApps } from "@/components/home/RelatedApps";
 import { Faq } from "@/components/content/Faq";
 import { FaqJsonLd } from "@/components/seo/JsonLd";
 import { concepts, faqItems } from "@/lib/content";
@@ -155,6 +156,9 @@ export default function Home() {
           </p>
         </Container>
       </section>
+
+      {/* Otras aplicaciones */}
+      <RelatedApps />
     </>
   );
 }

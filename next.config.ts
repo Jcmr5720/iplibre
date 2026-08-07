@@ -14,11 +14,14 @@ import type { NextConfig } from "next";
  */
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  // Google AdSense: dominios necesarios para el script oficial y los anuncios.
+  "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.googletagservices.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.adtrafficquality.google",
   "font-src 'self' data:",
-  "connect-src 'self' https://speed.cloudflare.com",
+  "connect-src 'self' https://speed.cloudflare.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.adtrafficquality.google",
+  // frame-src: los anuncios de AdSense se renderizan en iframes de Google.
+  "frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://*.adtrafficquality.google",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -57,12 +60,23 @@ const nextConfig: NextConfig = {
    */
   async redirects() {
     const legacyHosts = ["iplibre.vercel.app", "www.iplibre.online"];
-    return legacyHosts.map((host) => ({
+    const hostRedirects = legacyHosts.map((host) => ({
       source: "/:path*",
       has: [{ type: "host" as const, value: host }],
       destination: "https://iplibre.online/:path*",
       permanent: true,
     }));
+
+    /**
+     * Consolidación de intenciones de búsqueda muy próximas hacia su página
+     * canónica, para evitar contenido duplicado que compita entre sí.
+     */
+    const canonicalRedirects = [
+      { source: "/mi-ip-publica", destination: "/cual-es-mi-ip", permanent: true },
+      { source: "/test-de-internet", destination: "/medir-velocidad-internet", permanent: true },
+    ];
+
+    return [...hostRedirects, ...canonicalRedirects];
   },
 };
 
