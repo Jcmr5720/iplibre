@@ -99,7 +99,7 @@ export function DnsPropagation() {
       )}
 
       {loading && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-32 w-full" />
           ))}
@@ -123,7 +123,7 @@ export function DnsPropagation() {
             </Button>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {data.resolvers.map((r) => {
               const ok = r.status !== "ERROR" && r.values.length > 0;
               return (

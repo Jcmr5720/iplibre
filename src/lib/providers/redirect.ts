@@ -16,7 +16,7 @@
  * herramienta pública de diagnóstico que nunca devuelve el cuerpo ni expone
  * servicios internos, el riesgo es aceptable.
  */
-import { assertPublicHost, DnsResolutionError, SsrfError } from "@/lib/net/ssrf";
+import { secureRequest, SecureRequestError, type SecureResponse } from "@/lib/net/secure-connect";
 import { normalizeWebUrl } from "@/lib/net/url";
 import { classifyStatus, statusText } from "@/lib/net/httpStatus";
 import { canonicalForLoop, isLoop, isRedirectStatus, redirectType } from "@/lib/net/redirect";
@@ -64,36 +64,20 @@ export type RedirectOutcome =
   | { ok: true; data: RedirectTrace }
   | { ok: false; error: string; kind: RedirectErrorKind };
 
-function mapFetchError(err: unknown): { error: string; kind: RedirectErrorKind } {
-  const msg = err instanceof Error ? err.message.toLowerCase() : "";
-  if (err instanceof DOMException && err.name === "AbortError") {
-    return { error: "El servidor tardó demasiado en responder.", kind: "timeout" };
-  }
-  if (msg.includes("certificate") || msg.includes("tls") || msg.includes("ssl")) {
-    return { error: "El sitio tiene un problema con su certificado TLS.", kind: "tls" };
-  }
-  if (msg.includes("enotfound") || msg.includes("dns")) {
-    return { error: "No se pudo resolver el dominio (DNS).", kind: "dns" };
+function mapSecureError(err: unknown): { error: string; kind: RedirectErrorKind } {
+  if (err instanceof SecureRequestError) {
+    const kind: RedirectErrorKind = err.kind === "too-large" ? "connection" : (err.kind as RedirectErrorKind);
+    return { error: err.message, kind };
   }
   return { error: "No se pudo establecer conexión con el servidor.", kind: "connection" };
 }
 
-async function requestOnce(url: string, method: "HEAD" | "GET"): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-  try {
-    return await fetch(url, {
-      method,
-      redirect: "manual",
-      signal: controller.signal,
-      headers: {
-        "user-agent": "IPLibre/1.0 (+https://iplibre.online)",
-        accept: "text/html,application/xhtml+xml,*/*;q=0.8",
-      },
-    });
-  } finally {
-    clearTimeout(timer);
-  }
+/**
+ * Una petición con el cliente endurecido: resuelve, valida TODAS las IP, fija la
+ * aprobada y conserva el hostname para SNI/Host. No sigue redirecciones.
+ */
+async function requestOnce(url: string, method: "HEAD" | "GET"): Promise<SecureResponse> {
+  return secureRequest(url, { method, timeoutMs: TIMEOUT_MS, maxBodyBytes: 0 });
 }
 
 export async function traceRedirects(rawInput: string): Promise<RedirectOutcome> {
@@ -112,22 +96,13 @@ export async function traceRedirects(rawInput: string): Promise<RedirectOutcome>
   for (let index = 0; index <= MAX_REDIRECTS; index++) {
     const parsed = new URL(currentUrl);
 
-    // Revalidación SSRF en cada salto.
-    let ipAddresses: string[];
-    try {
-      ipAddresses = await assertPublicHost(parsed.hostname);
-    } catch (err) {
-      if (err instanceof SsrfError) return { ok: false, error: err.message, kind: "ssrf" };
-      if (err instanceof DnsResolutionError) return { ok: false, error: err.message, kind: "dns" };
-      return { ok: false, error: "No se pudo resolver el dominio.", kind: "dns" };
-    }
-
     visited.push(canonicalForLoop(currentUrl));
 
+    // El cliente revalida el destino (resuelve + valida + fija IP) en cada salto.
     // HEAD y, si no se admite, GET.
     const hopStart = Date.now();
     let method: "HEAD" | "GET" = "HEAD";
-    let res: Response;
+    let res: SecureResponse;
     try {
       res = await requestOnce(currentUrl, method);
       if (res.status === 405 || res.status === 501) {
@@ -135,10 +110,11 @@ export async function traceRedirects(rawInput: string): Promise<RedirectOutcome>
         res = await requestOnce(currentUrl, method);
       }
     } catch (err) {
-      const mapped = mapFetchError(err);
+      const mapped = mapSecureError(err);
       return { ok: false, ...mapped };
     }
     const responseMs = Date.now() - hopStart;
+    const ipAddresses = [res.ip];
 
     const status = res.status;
     const isRedirect = isRedirectStatus(status) && res.headers.has("location");

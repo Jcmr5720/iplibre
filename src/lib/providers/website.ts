@@ -1,16 +1,18 @@
 /**
- * Comprobación real del estado de un sitio web, con protección SSRF.
+ * Comprobación real del estado de un sitio web, endurecida contra SSRF y DNS
+ * rebinding.
  *
  * Metodología:
  *  1. Se normaliza la URL (esquema http/https).
- *  2. Antes de cada petición se resuelve el host y se verifica que sea público
- *     (assertPublicHost). Tras cada redirección se revalida el nuevo destino.
- *  3. Se siguen las redirecciones manualmente (máximo MAX_REDIRECTS) para poder
- *     revalidar cada salto y contar/mostrar la cadena.
+ *  2. Cada petición usa el cliente `secureRequest`, que resuelve el host,
+ *     valida TODAS sus IP, FIJA una IP pública aprobada para la conexión y
+ *     conserva el hostname para SNI/Host (sin re-resolver ni desactivar TLS).
+ *  3. Se siguen las redirecciones manualmente (máximo MAX_REDIRECTS),
+ *     revalidando cada salto con el mismo cliente.
  *  4. No se lee el cuerpo de la respuesta (solo estado, cabeceras y tiempos):
  *     esto acota la memoria y evita convertir la plataforma en un proxy.
  */
-import { assertPublicHost, SsrfError } from "@/lib/net/ssrf";
+import { secureRequest, SecureRequestError, type SecureResponse } from "@/lib/net/secure-connect";
 import { normalizeWebUrl } from "@/lib/net/url";
 import { classifyStatus, overallFromStatus, statusText } from "@/lib/net/httpStatus";
 
@@ -54,7 +56,7 @@ export type WebsiteCheckOutcome =
 
 export interface FollowResult {
   finalUrl: string;
-  res: Response;
+  res: SecureResponse;
   status: number;
   redirectChain: RedirectHop[];
   ipAddresses: string[];
@@ -86,45 +88,21 @@ export async function followRedirectsSafely(rawInput: string): Promise<FollowOut
   const started = Date.now();
 
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-    const parsed = new URL(currentUrl);
-
-    // Revalidación SSRF en cada salto (incluye el destino de las redirecciones).
+    // El cliente resuelve, valida TODAS las IP, fija la aprobada y conserva el
+    // hostname para SNI/Host. Revalidación efectiva en cada salto.
+    let res: SecureResponse;
     try {
-      ipAddresses = await assertPublicHost(parsed.hostname);
+      res = await secureRequest(currentUrl, { method: "GET", timeoutMs: TIMEOUT_MS, maxBodyBytes: 0 });
     } catch (err) {
-      if (err instanceof SsrfError) return { ok: false, error: err.message, kind: "ssrf" };
-      return { ok: false, error: "No se pudo resolver el dominio.", kind: "dns" };
-    }
-
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-    let res: Response;
-    try {
-      res = await fetch(currentUrl, {
-        method: "GET",
-        redirect: "manual",
-        signal: controller.signal,
-        headers: {
-          "user-agent": "IPLibre/1.0 (+https://iplibre.online)",
-          accept: "text/html,application/xhtml+xml,*/*;q=0.8",
-        },
-      });
-    } catch (err) {
-      clearTimeout(timer);
-      const msg = err instanceof Error ? err.message.toLowerCase() : "";
-      if (err instanceof DOMException && err.name === "AbortError") {
-        return { ok: false, error: "El servidor tardó demasiado en responder.", kind: "timeout" };
-      }
-      if (msg.includes("certificate") || msg.includes("tls") || msg.includes("ssl")) {
-        return { ok: false, error: "El sitio tiene un problema con su certificado TLS.", kind: "tls" };
-      }
-      if (msg.includes("enotfound") || msg.includes("dns")) {
-        return { ok: false, error: "No se pudo resolver el dominio (DNS).", kind: "dns" };
+      if (err instanceof SecureRequestError) {
+        const kind: FollowErrorKind =
+          err.kind === "too-large" ? "connection" : (err.kind as FollowErrorKind);
+        return { ok: false, error: err.message, kind };
       }
       return { ok: false, error: "No se pudo establecer conexión con el servidor.", kind: "connection" };
     }
-    clearTimeout(timer);
 
+    ipAddresses = [res.ip];
     const status = res.status;
     const isRedirect =
       classifyStatus(status) === "redirect" && res.headers.has("location") && hop < MAX_REDIRECTS;

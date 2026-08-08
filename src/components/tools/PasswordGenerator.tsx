@@ -168,9 +168,9 @@ export function PasswordGenerator() {
         </CardContent>
       </Card>
 
-      {error && (
+      {(error || !validation.ok) && (
         <Alert tone="warning" title="Revisa las opciones" role="alert">
-          {error}
+          {error ?? (!validation.ok ? validation.error : null)}
         </Alert>
       )}
 

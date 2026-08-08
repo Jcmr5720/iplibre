@@ -50,7 +50,7 @@ export function GeoLookup() {
           <Card className="lg:col-span-3">
             <CardContent>
               <h2 className="mb-3 text-sm font-semibold">
-                Resultado para <span className="font-mono">{data.ip}</span>
+                Resultado para <span className="font-mono break-all">{data.ip}</span>
               </h2>
               <DataList
                 rows={[

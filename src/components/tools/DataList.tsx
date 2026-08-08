@@ -17,7 +17,7 @@ export function DataList({ rows, className }: { rows: DataRow[]; className?: str
     <dl className={cn("divide-y divide-border", className)}>
       {visible.map((row) => (
         <div key={row.label} className="flex items-start justify-between gap-4 py-2.5">
-          <dt className="min-w-0 shrink-0 text-sm text-muted-foreground sm:w-56">
+          <dt className="min-w-0 text-sm break-words text-muted-foreground sm:w-56 sm:shrink-0">
             {row.label}
             {row.hint && <span className="ml-1 text-xs opacity-70">({row.hint})</span>}
           </dt>

@@ -46,3 +46,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# Playwright QA screenshots (artifacts)
+e2e/__screenshots__/

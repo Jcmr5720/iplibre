@@ -9,7 +9,8 @@
  * pública (assertPublicHost).
  */
 import tls from "node:tls";
-import { assertPublicHost, SsrfError } from "@/lib/net/ssrf";
+import { SsrfError } from "@/lib/net/ssrf";
+import { resolvePublicAddresses, pinnedLookup, type ApprovedAddress } from "@/lib/net/secure-connect";
 import { classifySsl, daysUntil, type SslState } from "@/lib/ssl/thresholds";
 
 const TIMEOUT_MS = 10_000;
@@ -71,12 +72,16 @@ function formatIssuer(issuer: Record<string, string | string[]> | undefined): {
 export async function checkSsl(host: string): Promise<SslOutcome> {
   const cleanHost = host.trim().toLowerCase().replace(/^\[|\]$/g, "");
 
+  // Resuelve y valida TODAS las IP; se fija una aprobada para la conexión y se
+  // conserva `servername` = hostname para SNI e identidad (defensa rebinding).
+  let approved: ApprovedAddress[];
   try {
-    await assertPublicHost(cleanHost);
+    approved = await resolvePublicAddresses(cleanHost);
   } catch (err) {
     if (err instanceof SsrfError) return { ok: false, error: err.message, kind: "ssrf" };
     return { ok: false, error: "No se pudo resolver el dominio.", kind: "dns" };
   }
+  const pick = approved[0];
 
   return new Promise<SslOutcome>((resolve) => {
     let settled = false;
@@ -96,6 +101,11 @@ export async function checkSsl(host: string): Promise<SslOutcome> {
         host: cleanHost,
         servername: cleanHost,
         port: PORT,
+        // Fija la IP validada; la librería no re-resuelve el nombre.
+        lookup: pinnedLookup(pick),
+        // Se inspeccionan certificados inválidos a propósito (se reporta la
+        // validez vía socket.authorized/checkServerIdentity), pero la conexión
+        // solo se abre contra una IP pública previamente validada.
         rejectUnauthorized: false,
         timeout: TIMEOUT_MS,
       },
