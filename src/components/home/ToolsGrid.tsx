@@ -23,10 +23,16 @@ function ToolCard({ tool }: { tool: NavItem }) {
   );
 }
 
-export function ToolsGrid({ className }: { className?: string }) {
+export function ToolsGrid({
+  className,
+  items = tools,
+}: {
+  className?: string;
+  items?: NavItem[];
+}) {
   return (
     <div className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-3", className)}>
-      {tools.map((tool) => (
+      {items.map((tool) => (
         <ToolCard key={tool.href} tool={tool} />
       ))}
     </div>

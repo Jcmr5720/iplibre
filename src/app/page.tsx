@@ -8,7 +8,7 @@ import { RelatedApps } from "@/components/home/RelatedApps";
 import { Faq } from "@/components/content/Faq";
 import { FaqJsonLd } from "@/components/seo/JsonLd";
 import { concepts, faqItems } from "@/lib/content";
-import { siteConfig } from "@/lib/config";
+import { siteConfig, featuredTools, tools } from "@/lib/config";
 
 export default function Home() {
   const homeFaqs = faqItems.slice(0, 6);
@@ -66,17 +66,17 @@ export default function Home() {
       <Container className="py-14">
         <div className="mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Todas las herramientas</h2>
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Herramientas destacadas</h2>
             <p className="mt-2 text-muted-foreground">
               Diagnóstico de tu conexión y de sitios web, con consultas reales y resultados
-              verificables.
+              verificables. Y muchas más en el catálogo completo.
             </p>
           </div>
           <Link href="/herramientas" className="text-sm font-medium text-primary hover:underline">
-            Ver la lista completa →
+            Ver las {tools.length} herramientas →
           </Link>
         </div>
-        <ToolsGrid />
+        <ToolsGrid items={featuredTools} />
       </Container>
 
       {/* Conceptos */}

@@ -73,7 +73,7 @@ export function getBaseUrl(): string {
   return "http://localhost:3000";
 }
 
-export type ToolCategory = "conexion" | "red" | "web";
+export type ToolCategory = "conexion" | "red" | "web" | "seguridad";
 
 export type NavItem = {
   href: string;
@@ -89,15 +89,21 @@ export const tools: NavItem[] = [
   { href: "/test-de-velocidad", label: "Test de velocidad", description: "Mide descarga, subida y latencia.", category: "conexion", keywords: ["velocidad", "speed test", "descarga", "subida", "ping", "jitter", "mbps", "internet", "banda ancha"] },
   { href: "/diagnostico-de-internet", label: "Diagnóstico", description: "Analiza el estado de tu conexión.", category: "conexion", keywords: ["diagnostico", "conexion", "estado", "internet", "problemas", "chequeo"] },
   { href: "/test-ipv6", label: "Test IPv6", description: "Comprueba compatibilidad IPv6.", category: "conexion", keywords: ["ipv6", "ip", "compatibilidad", "protocolo", "ipv4 vs ipv6"] },
+  { href: "/webrtc-leak-test", label: "WebRTC Leak Test", description: "¿Tu navegador filtra tu IP?", category: "conexion", keywords: ["webrtc", "fuga", "leak", "vpn", "ip", "privacidad", "navegador", "ice", "stun", "filtracion"] },
   { href: "/geolocalizar-ip", label: "Geolocalizar IP", description: "Ubicación aproximada de una IP.", category: "red", keywords: ["ip", "geolocalizacion", "ubicacion", "geo", "localizar", "pais", "ciudad", "mapa"] },
   { href: "/whois", label: "WHOIS / RDAP", description: "Datos de dominios, IP y ASN.", category: "red", keywords: ["whois", "rdap", "dominio", "registro", "propietario", "titular"] },
   { href: "/dns-lookup", label: "DNS Lookup", description: "Registros A, AAAA, MX, TXT y más.", category: "red", keywords: ["dns", "registros", "lookup", "resolver", "mx", "txt", "nameserver", "dominio"] },
   { href: "/propagacion-dns", label: "Propagación DNS", description: "Compara resolutores públicos.", category: "red", keywords: ["dns", "propagacion", "resolutores", "cambios dns", "global", "dominio"] },
   { href: "/asn-lookup", label: "ASN Lookup", description: "Sistemas autónomos y prefijos.", category: "red", keywords: ["asn", "sistema autonomo", "prefijos", "bgp", "operador", "red"] },
   { href: "/reverse-dns", label: "Reverse DNS", description: "Registro PTR de una IP.", category: "red", keywords: ["dns", "reverse", "ptr", "inverso", "ip", "hostname"] },
+  { href: "/dnssec-checker", label: "DNSSEC Checker", description: "Autenticidad criptográfica del DNS.", category: "red", keywords: ["dnssec", "ds", "dnskey", "firma", "dns", "cadena de confianza", "validacion", "seguridad dns"] },
+  { href: "/blacklist-checker", label: "Blacklist Checker", description: "¿La IP está en listas de reputación?", category: "red", keywords: ["blacklist", "lista negra", "dnsbl", "rbl", "reputacion", "spam", "ip", "spamhaus", "listas negras"] },
   { href: "/estado-web", label: "Estado web", description: "Comprueba si una web está disponible.", category: "web", keywords: ["web caida", "estado", "disponible", "up down", "http", "sitio", "monitor", "caida"] },
   { href: "/ssl-checker", label: "SSL Checker", description: "Comprueba el certificado HTTPS de un dominio.", category: "web", keywords: ["ssl", "tls", "certificado", "https", "seguridad", "caducidad", "cifrado"] },
   { href: "/headers-seguridad", label: "Headers de seguridad", description: "Qué protecciones HTTP usa una web.", category: "web", keywords: ["headers", "cabeceras", "seguridad", "csp", "hsts", "http", "proteccion"] },
+  { href: "/redirect-checker", label: "Redirect Checker", description: "Sigue la cadena de redirecciones.", category: "web", keywords: ["redireccion", "redirect", "301", "302", "308", "cadena", "location", "http", "url", "redirecciones"] },
+  { href: "/email-security-checker", label: "SPF, DKIM y DMARC", description: "Autenticación de correo de un dominio.", category: "seguridad", keywords: ["spf", "dkim", "dmarc", "correo", "email", "autenticacion", "phishing", "spoofing", "mail", "seguridad correo"] },
+  { href: "/generador-contrasenas", label: "Generador de contraseñas", description: "Contraseñas seguras en tu navegador.", category: "seguridad", keywords: ["password", "contrasena", "clave", "clave segura", "generador", "aleatoria", "seguridad", "passphrase", "contraseñas"] },
 ];
 
 /**
@@ -109,11 +115,31 @@ export const primaryTools: NavItem[] = ["/mi-ip", "/test-de-velocidad"]
   .map((href) => tools.find((t) => t.href === href))
   .filter((t): t is NavItem => Boolean(t));
 
+/**
+ * Selección destacada para la Home: mantiene visibles las herramientas
+ * principales sin saturar con todo el catálogo. El resto se descubre en
+ * /herramientas y en el mega-menú "Todas las herramientas".
+ */
+export const featuredTools: NavItem[] = [
+  "/mi-ip",
+  "/test-de-velocidad",
+  "/diagnostico-de-internet",
+  "/test-ipv6",
+  "/geolocalizar-ip",
+  "/whois",
+  "/dns-lookup",
+  "/ssl-checker",
+  "/generador-contrasenas",
+]
+  .map((href) => tools.find((t) => t.href === href))
+  .filter((t): t is NavItem => Boolean(t));
+
 /** Herramientas agrupadas por categoría, para el menú y /herramientas. */
 export const toolCategories: { id: ToolCategory; title: string; items: NavItem[] }[] = [
   { id: "conexion", title: "Mi conexión", items: tools.filter((t) => t.category === "conexion") },
   { id: "red", title: "Dominios y red", items: tools.filter((t) => t.category === "red") },
   { id: "web", title: "Sitios web", items: tools.filter((t) => t.category === "web") },
+  { id: "seguridad", title: "Seguridad y utilidades", items: tools.filter((t) => t.category === "seguridad") },
 ];
 
 /** Normaliza texto para búsqueda: minúsculas y sin acentos. */
@@ -218,6 +244,10 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
   {
     title: "Sitios web",
     items: tools.filter((t) => t.category === "web"),
+  },
+  {
+    title: "Seguridad y utilidades",
+    items: tools.filter((t) => t.category === "seguridad"),
   },
   {
     title: "Recursos",
