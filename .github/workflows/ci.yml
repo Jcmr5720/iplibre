@@ -20,7 +20,8 @@ jobs:
       CI: "true"
       # El E2E mockea /api; NO se requieren secretos de Mercado Pago. Los tests
       # de checkout real (@live) quedan fuera de CI (proyecto "live").
-      NEXT_PUBLIC_SITE_URL: "http://localhost:3401"
+      # No se fija NEXT_PUBLIC_SITE_URL: los tests SEO gestionan su propio entorno
+      # y `siteConfig.url` debe resolver al dominio canónico.
     steps:
       - uses: actions/checkout@v4
 
