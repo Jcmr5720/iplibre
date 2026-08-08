@@ -11,6 +11,7 @@ const staticPaths = [
   "/privacidad",
   "/cookies",
   "/aviso-legal",
+  "/donar",
 ];
 
 /**

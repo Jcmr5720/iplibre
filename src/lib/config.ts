@@ -100,6 +100,15 @@ export const tools: NavItem[] = [
   { href: "/headers-seguridad", label: "Headers de seguridad", description: "Qué protecciones HTTP usa una web.", category: "web", keywords: ["headers", "cabeceras", "seguridad", "csp", "hsts", "http", "proteccion"] },
 ];
 
+/**
+ * Herramientas primarias que se muestran como enlaces directos en la barra de
+ * navegación (estilo PDFLibre). El resto vive en el mega-menú "Todas las
+ * herramientas". Fuente única de verdad: cambiar los href aquí reordena el header.
+ */
+export const primaryTools: NavItem[] = ["/mi-ip", "/test-de-velocidad"]
+  .map((href) => tools.find((t) => t.href === href))
+  .filter((t): t is NavItem => Boolean(t));
+
 /** Herramientas agrupadas por categoría, para el menú y /herramientas. */
 export const toolCategories: { id: ToolCategory; title: string; items: NavItem[] }[] = [
   { id: "conexion", title: "Mi conexión", items: tools.filter((t) => t.category === "conexion") },
@@ -148,6 +157,7 @@ export const learnLinks: NavItem[] = [
 export const aboutLinks: NavItem[] = [
   { href: "/acerca-de", label: "Acerca de", description: "Qué es IPLibre y cómo funciona" },
   { href: "/contacto", label: "Contacto", description: "Escríbenos tus dudas o sugerencias" },
+  { href: "/donar", label: "Donar", description: "Apoya el mantenimiento de IPLibre" },
 ];
 
 /**
@@ -217,6 +227,7 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
       { href: "/ipv4-vs-ipv6", label: "IPv4 vs IPv6" },
       { href: "/preguntas-frecuentes", label: "Preguntas frecuentes" },
       { href: "/acerca-de", label: "Acerca de" },
+      { href: "/donar", label: "Donar" },
     ],
   },
   {

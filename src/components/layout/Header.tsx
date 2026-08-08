@@ -16,9 +16,11 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { DonateButton } from "@/components/donation/DonateButton";
 import {
   aboutLinks,
   learnLinks,
+  primaryTools,
   relatedApps,
   searchTools,
   toolCategories,
@@ -189,47 +191,21 @@ export function Header() {
         {/* Navegación de escritorio (a partir de 1024px; tablet usa el drawer). */}
         <div ref={deskRef} className="hidden items-center gap-1 lg:flex">
           <nav aria-label="Principal" className="flex items-center gap-0.5">
-            {toolCategories.map((cat) => {
-              const id = cat.id;
-              const isOpen = open === id;
+            {/* Enlaces directos a las herramientas primarias (estilo PDFLibre) */}
+            {primaryTools.map((tool) => {
+              const active = pathname === tool.href;
               return (
-                <div key={id} className="relative">
-                  <button
-                    ref={(el) => {
-                      triggerRefs.current[id] = el;
-                    }}
-                    type="button"
-                    onClick={() => toggle(id)}
-                    className={cn(
-                      "inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-                      isOpen ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-                    )}
-                    aria-expanded={isOpen}
-                    aria-haspopup="menu"
-                    aria-controls={`menu-${id}`}
-                  >
-                    {cat.title}
-                    <ChevronDown
-                      className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")}
-                      aria-hidden
-                    />
-                  </button>
-
-                  {isOpen && (
-                    <div
-                      id={`menu-${id}`}
-                      role="menu"
-                      className={cn(
-                        "absolute left-0 top-full z-50 mt-2 rounded-xl border border-border bg-card p-2 shadow-lg",
-                        cat.items.length > 4 ? "grid w-[34rem] grid-cols-2 gap-1" : "w-72",
-                      )}
-                    >
-                      {cat.items.map((tool) => (
-                        <ToolRow key={tool.href} tool={tool} onNavigate={close} />
-                      ))}
-                    </div>
+                <Link
+                  key={tool.href}
+                  href={tool.href}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+                    active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                   )}
-                </div>
+                  aria-current={active ? "page" : undefined}
+                >
+                  {tool.label}
+                </Link>
               );
             })}
 
@@ -260,6 +236,8 @@ export function Header() {
           </nav>
 
           <div className="mx-1 h-6 w-px bg-border" aria-hidden />
+
+          <DonateButton variant="compact" />
 
           <ThemeToggle />
 
@@ -552,6 +530,32 @@ function MobileDrawer({
 
         <nav aria-label="Menú móvil" className="flex-1 px-4 pb-6">
           <p className="pb-1 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Principales
+          </p>
+          <ul className="space-y-0.5 pb-2">
+            {primaryTools.map((tool) => {
+              const active = pathname === tool.href;
+              const Icon = TOOL_ICONS[tool.href] ?? FALLBACK_TOOL_ICON;
+              return (
+                <li key={tool.href}>
+                  <Link
+                    href={tool.href}
+                    onClick={onClose}
+                    className={cn(
+                      "flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors",
+                      active ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted",
+                    )}
+                    aria-current={active ? "page" : undefined}
+                  >
+                    <Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    {tool.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          <p className="pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Herramientas
           </p>
 
@@ -641,6 +645,10 @@ function MobileDrawer({
               Otras aplicaciones
             </p>
             <AppRecommendation onNavigate={onClose} />
+          </div>
+
+          <div className="pt-6">
+            <DonateButton variant="block" onClick={onClose} />
           </div>
         </nav>
       </div>
