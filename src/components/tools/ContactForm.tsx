@@ -25,6 +25,8 @@ export function ContactForm() {
       message: String(data.get("message") || ""),
       consent: data.get("consent") === "on",
       website: String(data.get("website") || ""), // honeypot
+      // Página desde la que se envía (informativa para el correo).
+      page: typeof window !== "undefined" ? window.location.pathname : "",
     };
 
     // Validación básica en cliente (la definitiva está en el servidor).
@@ -45,7 +47,7 @@ export function ContactForm() {
     if (res.ok) {
       if (res.data.status === "sent") {
         setStatus("sent");
-        setMessage("¡Mensaje enviado! Gracias por escribirnos.");
+        setMessage("Mensaje enviado correctamente. Gracias por contactarnos.");
         form.reset();
       } else {
         setStatus("configuring");

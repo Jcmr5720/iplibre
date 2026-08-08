@@ -1,17 +1,23 @@
 import { NextRequest } from "next/server";
+import { createHash } from "node:crypto";
 import { enforceRateLimit, jsonError, jsonOk } from "@/lib/api";
-import { contactSchema } from "@/lib/validation";
+import {
+  contactRequestSchema,
+  sanitizeContactRequest,
+} from "@/lib/contact/contact";
+import { sendContactEmail } from "@/lib/contact/send-contact-email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Formulario de contacto. Arquitectura preparada para un proveedor de correo
- * (Resend) vía variables de entorno. Si no hay proveedor configurado, la
- * petición se valida correctamente y se responde con transparencia de que el
- * canal está en configuración (sin bloquear el despliegue ni inventar buzones).
+ * Formulario de contacto de IPLibre. Envío exclusivamente en servidor vía
+ * Resend (ver `send-contact-email`). La API Key nunca sale del servidor; el
+ * usuario no controla `from`, destinatario ni cabeceras. Su correo se usa como
+ * `replyTo`. Si el proveedor no está configurado, degrada de forma honesta.
  */
 export async function POST(req: NextRequest) {
+  // Rate limit: máximo 5 envíos por minuto por IP.
   const limited = enforceRateLimit(req, "contact", 5, 60_000);
   if (limited) return limited;
 
@@ -22,23 +28,35 @@ export async function POST(req: NextRequest) {
     return jsonError("Cuerpo de la petición no válido.", 400);
   }
 
-  const parsed = contactSchema.safeParse(body);
+  const parsed = contactRequestSchema.safeParse(body);
   if (!parsed.success) {
     const first = parsed.error.issues[0];
     return jsonError(first?.message ?? "Revisa los datos del formulario.", 422);
   }
 
   // Honeypot: si el campo oculto llega con contenido, tratamos como spam
-  // pero respondemos 200 para no dar pistas al bot.
+  // pero respondemos 200 para no dar pistas al bot (y no enviamos correo).
   if (parsed.data.website && parsed.data.website.length > 0) {
     return jsonOk({ delivered: false, status: "ok" });
   }
 
-  const resendKey = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_TO_EMAIL;
+  const data = sanitizeContactRequest(parsed.data);
 
-  if (!resendKey || !to) {
-    // Degradación honesta.
+  // Clave de idempotencia derivada del contenido: dos envíos idénticos
+  // seguidos no generan correos duplicados (Resend deduplica por esta clave).
+  const idempotencyKey = createHash("sha256")
+    .update(`${data.email}|${data.subject}|${data.message}`)
+    .digest("hex")
+    .slice(0, 32);
+
+  const result = await sendContactEmail(data, idempotencyKey);
+
+  if (result.sent) {
+    return jsonOk({ delivered: true, status: "sent" });
+  }
+
+  if (result.reason === "missing_config") {
+    // Degradación honesta: el mensaje se valida pero el canal no está listo.
     return jsonOk({
       delivered: false,
       status: "configuring",
@@ -47,27 +65,9 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${resendKey}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        from: process.env.CONTACT_FROM_EMAIL || "IPLibre <onboarding@resend.dev>",
-        to: [to],
-        reply_to: parsed.data.email,
-        subject: `[IPLibre] ${parsed.data.subject}`,
-        text: `De: ${parsed.data.name} <${parsed.data.email}>\n\n${parsed.data.message}`,
-      }),
-    });
-    if (!res.ok) throw new Error(`Resend ${res.status}`);
-    return jsonOk({ delivered: true, status: "sent" });
-  } catch {
-    return jsonError(
-      "No se pudo enviar el mensaje en este momento. Inténtalo más tarde.",
-      502,
-    );
-  }
+  // provider_error: fallo temporal del proveedor. El usuario puede reintentar.
+  return jsonError(
+    "No pudimos enviar tu mensaje. Inténtalo nuevamente.",
+    502,
+  );
 }
