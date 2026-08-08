@@ -32,6 +32,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Build primero: Next 16 genera los tipos (LayoutProps, PageProps…) en
+      # .next/types durante el build; `tsc --noEmit` los necesita. En un checkout
+      # limpio, typecheck ANTES del build falla con TS2304.
+      - name: Build
+        run: npm run build
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -40,9 +46,6 @@ jobs:
 
       - name: Unit tests
         run: npm test
-
-      - name: Build
-        run: npm run build
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
