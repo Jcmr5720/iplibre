@@ -183,14 +183,16 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
         <Link href="/" aria-label="IPLibre — inicio" className="shrink-0">
           <Logo />
         </Link>
 
-        {/* Navegación de escritorio (a partir de 1024px; tablet usa el drawer). */}
-        <div ref={deskRef} className="hidden items-center gap-1 lg:flex">
-          <nav aria-label="Principal" className="flex items-center gap-0.5">
+        {/* Navegación de escritorio (a partir de 1024px; tablet usa el drawer).
+            Estructura tipo PDFLibre: logo a la izquierda, menú centrado y
+            controles (donar, tema, menú extra) a la derecha. */}
+        <div ref={deskRef} className="hidden flex-1 items-center lg:flex">
+          <nav aria-label="Principal" className="mx-auto flex items-center gap-0.5">
             {/* Enlaces directos a las herramientas primarias (estilo PDFLibre) */}
             {primaryTools.map((tool) => {
               const active = pathname === tool.href;
@@ -235,14 +237,14 @@ export function Header() {
             </div>
           </nav>
 
-          <div className="mx-1 h-6 w-px bg-border" aria-hidden />
+          {/* Controles a la derecha */}
+          <div className="flex items-center gap-1">
+            <DonateButton variant="compact" />
 
-          <DonateButton variant="compact" />
+            <ThemeToggle />
 
-          <ThemeToggle />
-
-          {/* Menú secundario "Más" */}
-          <div className="relative">
+            {/* Menú secundario "Más" */}
+            <div className="relative">
             <button
               ref={(el) => {
                 triggerRefs.current["mas"] = el;
@@ -311,6 +313,7 @@ export function Header() {
                 <AppRecommendation onNavigate={close} />
               </div>
             )}
+            </div>
           </div>
         </div>
 
