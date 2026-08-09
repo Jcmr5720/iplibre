@@ -7,6 +7,7 @@ import { mockApis } from "./fixtures";
  */
 
 const DIR = "e2e/__screenshots__";
+const CONSENT_KEY = "iplibre_privacy_consent";
 
 const PAGES: { name: string; route: string; trigger?: (p: Page) => Promise<void> }[] = [
   { name: "home", route: "/" },
@@ -48,7 +49,20 @@ function fillFirst(value: string) {
 }
 
 async function setTheme(page: Page, theme: "light" | "dark") {
-  await page.getByRole("radio", { name: theme === "dark" ? "Oscuro" : "Claro" }).first().click();
+  await page.evaluate(({ consentKey, theme }) => {
+    localStorage.setItem(
+      consentKey,
+      JSON.stringify({
+        version: 1,
+        categories: { necessary: true, preferences: true, analytics: false, marketing: false },
+        decidedAt: new Date().toISOString(),
+        expiresAt: "2099-01-01T00:00:00.000Z",
+      }),
+    );
+    localStorage.setItem("theme", theme);
+  }, { consentKey: CONSENT_KEY, theme });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction((expected) => document.documentElement.classList.contains(expected), theme);
 }
 
 for (const size of [375, 1440]) {

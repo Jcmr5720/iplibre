@@ -3,8 +3,9 @@
  * Por privacidad, nunca se sube automáticamente a un servidor.
  */
 import type { SpeedResult } from "@/lib/speed/types";
+import { hasConsent } from "@/lib/privacy/consent";
+import { SPEED_HISTORY_KEY } from "@/lib/privacy/storage-registry";
 
-const KEY = "iplibre:speed-history:v1";
 const MAX_ENTRIES = 50;
 
 export interface HistoryEntry extends SpeedResult {
@@ -14,8 +15,9 @@ export interface HistoryEntry extends SpeedResult {
 
 export function loadHistory(): HistoryEntry[] {
   if (typeof window === "undefined") return [];
+  if (!hasConsent("preferences")) return [];
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = window.localStorage.getItem(SPEED_HISTORY_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
@@ -26,9 +28,10 @@ export function loadHistory(): HistoryEntry[] {
 
 export function saveEntry(entry: HistoryEntry): HistoryEntry[] {
   if (typeof window === "undefined") return [];
+  if (!hasConsent("preferences")) return [];
   const list = [entry, ...loadHistory()].slice(0, MAX_ENTRIES);
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(list));
+    window.localStorage.setItem(SPEED_HISTORY_KEY, JSON.stringify(list));
   } catch {
     /* almacenamiento lleno o bloqueado */
   }
@@ -38,7 +41,7 @@ export function saveEntry(entry: HistoryEntry): HistoryEntry[] {
 export function clearHistory(): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.removeItem(KEY);
+    window.localStorage.removeItem(SPEED_HISTORY_KEY);
   } catch {
     /* ignora */
   }

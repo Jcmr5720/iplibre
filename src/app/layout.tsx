@@ -1,8 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Inter, JetBrains_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/Header";
@@ -27,7 +24,7 @@ const baseUrl = getBaseUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: `${siteConfig.name} — ${siteConfig.slogan}`,
+    default: `${siteConfig.name} - ${siteConfig.slogan}`,
     template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -42,12 +39,12 @@ export const metadata: Metadata = {
     locale: "es_ES",
     url: baseUrl,
     siteName: siteConfig.name,
-    title: `${siteConfig.name} — ${siteConfig.slogan}`,
+    title: `${siteConfig.name} - ${siteConfig.slogan}`,
     description: siteConfig.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} — ${siteConfig.slogan}`,
+    title: `${siteConfig.name} - ${siteConfig.slogan}`,
     description: siteConfig.description,
   },
   robots: {
@@ -58,11 +55,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
   },
-  // Verificación de propiedad en Google Search Console.
   verification: {
     google: verification.google,
   },
-  // Verificación de AdSense (etiqueta oficial google-adsense-account).
   other: {
     "google-adsense-account": verification.adsenseClient,
   },
@@ -96,21 +91,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </Providers>
         <WebSiteJsonLd />
         <OrganizationJsonLd />
-        <Analytics />
-        <SpeedInsights />
-        {/*
-          Script oficial de Google AdSense. Carga diferida (afterInteractive)
-          para no afectar a las Core Web Vitals. No muestra anuncios por sí
-          solo: solo habilita la verificación del sitio y, en su caso, los Auto
-          Ads que se activen desde el panel de AdSense.
-        */}
-        <Script
-          id="adsbygoogle-init"
-          strategy="afterInteractive"
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${verification.adsenseClient}`}
-          crossOrigin="anonymous"
-        />
       </body>
     </html>
   );

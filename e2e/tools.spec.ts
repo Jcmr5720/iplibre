@@ -38,6 +38,21 @@ const TOOLS: ToolCase[] = [
   },
 ];
 
+async function allowPreferences(page: Page) {
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "iplibre_privacy_consent",
+      JSON.stringify({
+        version: 1,
+        categories: { necessary: true, preferences: true, analytics: false, marketing: false },
+        decidedAt: new Date().toISOString(),
+        expiresAt: "2099-01-01T00:00:00.000Z",
+      }),
+    );
+  });
+  await page.reload({ waitUntil: "domcontentloaded" });
+}
+
 async function trigger(page: Page, tc: ToolCase) {
   if (tc.custom) {
     await tc.custom(page);
@@ -92,6 +107,7 @@ test.describe("Modo oscuro con resultados", () => {
     test(`${route} legible en oscuro`, async ({ page }) => {
       await mockApis(page);
       await page.goto(route);
+      await allowPreferences(page);
       await page.getByRole("radio", { name: "Oscuro" }).click();
       await expect(page.locator("html")).toHaveClass(/dark/);
       const input = page.getByRole("textbox").first();

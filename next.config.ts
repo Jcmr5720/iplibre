@@ -76,6 +76,7 @@ const nextConfig: NextConfig = {
     const canonicalRedirects = [
       { source: "/mi-ip-publica", destination: "/cual-es-mi-ip", permanent: true },
       { source: "/test-de-internet", destination: "/medir-velocidad-internet", permanent: true },
+      { source: "/politica-de-cookies", destination: "/cookies", permanent: true },
     ];
 
     return [...hostRedirects, ...canonicalRedirects];

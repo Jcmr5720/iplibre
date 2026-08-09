@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { footerNav, relatedApps, siteConfig } from "@/lib/config";
+import { PrivacyPreferencesButton } from "@/components/privacy/PrivacyPreferencesButton";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -13,7 +14,7 @@ export function Footer() {
             <Logo />
             <p className="mt-3 text-sm text-muted-foreground">{siteConfig.slogan}.</p>
             <p className="mt-3 text-xs text-muted-foreground">
-              Herramientas con finalidad informativa y de diagnóstico. Las ubicaciones son
+              Herramientas con finalidad informativa y de diagnostico. Las ubicaciones son
               aproximadas y los resultados pueden variar.
             </p>
           </div>
@@ -58,9 +59,8 @@ export function Footer() {
           <p>
             © {year} {siteConfig.name}. Servicio gratuito e independiente.
           </p>
-          <p>
-            Datos WHOIS/RDAP, DNS, ASN y geolocalización provienen de fuentes externas públicas.
-          </p>
+          <p>Datos WHOIS/RDAP, DNS, ASN y geolocalizacion provienen de fuentes externas publicas.</p>
+          <PrivacyPreferencesButton />
         </div>
       </div>
     </footer>

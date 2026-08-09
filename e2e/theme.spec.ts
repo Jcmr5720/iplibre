@@ -1,12 +1,21 @@
 import { test, expect } from "@playwright/test";
 
+async function allowPreferences(page: import("@playwright/test").Page) {
+  await page.goto("/");
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.getByRole("button", { name: "Configurar" }).click();
+  await page.getByRole("checkbox", { name: /^Preferencias/ }).check();
+  await page.getByRole("button", { name: "Guardar preferencias" }).click();
+}
+
 /**
  * Tema: el modo oscuro se conserva al recargar y al navegar (next-themes en
  * localStorage), y el modo claro se restaura correctamente.
  */
 test.describe("Tema claro / oscuro", () => {
   test("el modo oscuro persiste al recargar y navegar", async ({ page }) => {
-    await page.goto("/");
+    await allowPreferences(page);
     await page.getByRole("radio", { name: "Oscuro" }).click();
     await expect(page.locator("html")).toHaveClass(/dark/);
 
@@ -18,7 +27,7 @@ test.describe("Tema claro / oscuro", () => {
   });
 
   test("vuelve a claro sin romper el layout", async ({ page }) => {
-    await page.goto("/");
+    await allowPreferences(page);
     await page.getByRole("radio", { name: "Oscuro" }).click();
     await expect(page.locator("html")).toHaveClass(/dark/);
     await page.getByRole("radio", { name: "Claro" }).click();
