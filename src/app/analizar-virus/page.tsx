@@ -8,7 +8,7 @@ import { VirusAnalyzer } from "@/components/tools/VirusAnalyzer";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Analizar virus en archivos con analisis local | IPLibre",
+  title: "Analizar virus en archivos online con análisis local",
   description: "Analiza un archivo sospechoso directamente en tu navegador. Detecta formatos e indicadores de riesgo con privacidad: el archivo no se sube a IPLibre.",
   path: "/analizar-virus",
 });
@@ -65,4 +65,3 @@ export default function Page() {
     </ToolPage>
   );
 }
-
