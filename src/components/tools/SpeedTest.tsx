@@ -89,7 +89,7 @@ export function SpeedTest() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardContent className="flex flex-col items-center gap-6 py-8">
+        <CardContent className="flex flex-col items-center gap-5 py-6 sm:py-8">
           <Dial fraction={dialValue} phase={progress.phase} running={running}>
             {status === "idle" ? (
               <div className="text-center">
@@ -137,6 +137,22 @@ export function SpeedTest() {
                 </div>
               );
             })}
+          </div>
+
+          <div className="w-full max-w-md">
+            <div className="h-2 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full brand-gradient-bg transition-[width] duration-300"
+                style={{ width: `${Math.round(Math.max(0, Math.min(1, progress.fraction)) * 100)}%` }}
+              />
+            </div>
+            <p className="mt-2 text-center text-xs text-muted-foreground" role="status" aria-live="polite">
+              {status === "idle"
+                ? "Inicia la prueba cuando la red esté libre."
+                : status === "done"
+                  ? "Medición completada."
+                  : progress.message ?? phaseStatus(progress.phase)}
+            </p>
           </div>
 
           {/* Controles */}
@@ -237,6 +253,13 @@ export function SpeedTest() {
 
 function phaseLabel(phase: string): string {
   return phase === "latency" ? "latencia" : phase === "download" ? "descarga" : phase === "upload" ? "subida" : phase;
+}
+
+function phaseStatus(phase: string): string {
+  if (phase === "latency") return "Midiendo ping HTTPS y jitter.";
+  if (phase === "download") return "Midiendo velocidad de descarga.";
+  if (phase === "upload") return "Midiendo velocidad de subida.";
+  return "Preparando medición.";
 }
 
 function phaseDone(current: string, key: string, status: string): boolean {
@@ -353,6 +376,10 @@ function ResultPanel({
         ))}
       </div>
 
+      <Alert tone="info">
+        <strong className="text-foreground">{quality.label}:</strong> {interpretResult(result)}
+      </Alert>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardContent>
@@ -415,4 +442,19 @@ function ResultPanel({
       </Alert>
     </div>
   );
+}
+
+function interpretResult(result: import("@/lib/speed/types").SpeedResult): string {
+  const download = toMbps(result.downloadBps);
+  const upload = toMbps(result.uploadBps);
+  if (download >= 100 && upload >= 20 && result.latencyMs < 60) {
+    return "conexión holgada para streaming, videollamadas, juegos casuales y varios dispositivos.";
+  }
+  if (download >= 25 && upload >= 5 && result.latencyMs < 120) {
+    return "conexión adecuada para uso diario, streaming HD y videollamadas normales.";
+  }
+  if (download >= 5) {
+    return "conexión útil para navegar, aunque videollamadas, descargas grandes o Wi-Fi saturado pueden sentirse lentos.";
+  }
+  return "conexión limitada; conviene repetir la prueba cerca del router y revisar si otros dispositivos consumen ancho de banda.";
 }

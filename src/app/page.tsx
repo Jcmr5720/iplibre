@@ -26,22 +26,24 @@ export default function Home() {
                 <Zap className="h-3.5 w-3.5 text-primary" /> Diagnóstico de Internet gratuito
               </span>
               <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
-                Descubre tu IP y mide la velocidad de tu{" "}
-                <span className="brand-gradient-text">Internet</span>
+                Conoce tu IP, analiza tu conexión y comprueba tu privacidad
               </h1>
               <p className="mt-4 max-w-xl text-lg text-muted-foreground">
                 {siteConfig.name} reúne todo lo que necesitas para diagnosticar tu conexión: IP,
-                velocidad, latencia, DNS, WHOIS/RDAP, ASN y geolocalización. Datos reales, sin
+                velocidad, latencia, privacidad WebRTC, DNS, WHOIS/RDAP, ASN y geolocalización. Datos reales, sin
                 registro y respetando tu privacidad.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <ButtonLink href="/test-de-velocidad" size="lg">
-                  <Gauge className="h-5 w-5" /> Iniciar test de velocidad
-                </ButtonLink>
-                <ButtonLink href="/mi-ip" size="lg" variant="outline">
+                <ButtonLink href="/mi-ip" size="lg">
                   <Globe2 className="h-5 w-5" /> Ver mi IP
                 </ButtonLink>
+                <ButtonLink href="/test-de-velocidad" size="lg" variant="outline">
+                  <Gauge className="h-5 w-5" /> Test de velocidad
+                </ButtonLink>
               </div>
+              <Link href="/webrtc-leak-test" className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+                <ShieldCheck className="h-4 w-4" /> Comprobar fugas WebRTC
+              </Link>
             </div>
 
             <div className="lg:pl-6">
@@ -64,6 +66,27 @@ export default function Home() {
 
       {/* Herramientas */}
       <Container className="py-14">
+        <div className="mb-8 grid gap-3 lg:grid-cols-3">
+          {featuredTools.slice(0, 3).map((tool, index) => {
+            const Icon = tool.href === "/mi-ip" ? Globe2 : tool.href === "/test-de-velocidad" ? Gauge : ShieldCheck;
+            return (
+              <Link
+                key={tool.href}
+                href={tool.href}
+                className="group rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-muted"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <Icon className="h-5 w-5 text-primary" />
+                    {tool.label}
+                  </span>
+                  <span className="text-xs font-medium text-muted-foreground">0{index + 1}</span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">{tool.description}</p>
+              </Link>
+            );
+          })}
+        </div>
         <div className="mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
           <div>
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Herramientas destacadas</h2>

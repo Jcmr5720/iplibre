@@ -8,6 +8,8 @@ import {
   ChevronDown,
   ExternalLink,
   FileText,
+  Gauge,
+  Globe2,
   Grid3x3,
   LayoutGrid,
   Menu,
@@ -318,7 +320,7 @@ export function Header() {
         </div>
 
         {/* Controles móvil / tablet */}
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="ml-auto flex items-center gap-2 lg:hidden">
           <ThemeToggle />
           <button
             ref={menuBtnRef}
@@ -333,6 +335,29 @@ export function Header() {
           </button>
         </div>
       </div>
+
+      <nav aria-label="Accesos rápidos" className="grid grid-cols-2 border-t border-border bg-background/95 lg:hidden">
+        <Link
+          href="/mi-ip"
+          className={cn(
+            "flex h-11 items-center justify-center gap-2 text-sm font-medium",
+            pathname === "/mi-ip" ? "text-primary" : "text-foreground",
+          )}
+        >
+          <Globe2 className="h-4 w-4" aria-hidden />
+          Mi IP
+        </Link>
+        <Link
+          href="/test-de-velocidad"
+          className={cn(
+            "flex h-11 items-center justify-center gap-2 border-l border-border text-sm font-medium",
+            pathname === "/test-de-velocidad" ? "text-primary" : "text-foreground",
+          )}
+        >
+          <Gauge className="h-4 w-4" aria-hidden />
+          Velocidad
+        </Link>
+      </nav>
 
       {/* Mega-menú "Todas las herramientas" — banda a lo ancho bajo el header */}
       {open === "todas" &&

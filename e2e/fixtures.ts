@@ -296,6 +296,7 @@ export const VIEWPORTS = [
   { label: "360x640", width: 360, height: 640 },
   { label: "375x667", width: 375, height: 667 },
   { label: "390x844", width: 390, height: 844 },
+  { label: "412x915", width: 412, height: 915 },
   { label: "430x932", width: 430, height: 932 },
   { label: "768x1024", width: 768, height: 1024 },
   { label: "1024x768", width: 1024, height: 768 },

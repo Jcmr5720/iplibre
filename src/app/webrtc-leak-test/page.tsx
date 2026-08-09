@@ -92,8 +92,8 @@ export default function Page() {
       <RelatedLinks
         links={[
           { href: "/mi-ip", label: "Mi IP", description: "Tu dirección IP pública" },
+          { href: "/test-de-velocidad", label: "Test de velocidad", description: "Mide tu conexión si usas VPN o Wi-Fi" },
           { href: "/test-ipv6", label: "Test IPv6", description: "Compatibilidad IPv6 de tu conexión" },
-          { href: "/generador-contrasenas", label: "Generador de contraseñas", description: "Contraseñas seguras" },
         ]}
       />
     </ToolPage>

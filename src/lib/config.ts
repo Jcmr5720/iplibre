@@ -123,8 +123,9 @@ export const primaryTools: NavItem[] = ["/mi-ip", "/test-de-velocidad"]
 export const featuredTools: NavItem[] = [
   "/mi-ip",
   "/test-de-velocidad",
-  "/diagnostico-de-internet",
+  "/webrtc-leak-test",
   "/test-ipv6",
+  "/diagnostico-de-internet",
   "/geolocalizar-ip",
   "/whois",
   "/dns-lookup",
