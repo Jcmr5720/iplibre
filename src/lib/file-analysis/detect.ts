@@ -27,9 +27,12 @@ export function detectFileType(bytes: Uint8Array, name = ""): DetectedType {
   if (starts(bytes, [0x37, 0x7a, 0xbc, 0xaf, 0x27, 0x1c])) return { id: "7z", label: "Archivo 7Z", mime: "application/x-7z-compressed", extensions: ["7z"], confidence: "alta", analysis: "parcial" };
   if (starts(bytes, [0x1f, 0x8b])) return { id: "gzip", label: "Archivo GZIP", mime: "application/gzip", extensions: ["gz", "tgz"], confidence: "alta", analysis: "parcial" };
   if (starts(bytes, [0x7f, 0x45, 0x4c, 0x46])) return { id: "elf", label: "Ejecutable ELF", mime: "application/x-elf", extensions: ["elf", "so", "bin", "run", ""], confidence: "alta", analysis: "parcial" };
+  if (starts(bytes, [0x4c, 0x00, 0x00, 0x00, 0x01, 0x14, 0x02, 0x00])) return { id: "lnk", label: "Acceso directo de Windows (LNK)", mime: "application/x-ms-shortcut", extensions: ["lnk"], confidence: "alta", analysis: "parcial" };
   if (bytes.length > 262 && ascii(bytes, 257, 5) === "ustar") return { id: "tar", label: "Archivo TAR", mime: "application/x-tar", extensions: ["tar"], confidence: "alta", analysis: "parcial" };
   const scriptExtensions = ["js", "mjs", "cjs", "vbs", "vbe", "ps1", "bat", "cmd", "hta", "sh"];
   const head = new TextDecoder("utf-8", { fatal: false }).decode(bytes.subarray(0, Math.min(bytes.length, 4096)));
+  if (/<svg[\s>]/i.test(head) || ext === "svg") return { id: "svg", label: "Imagen SVG", mime: "image/svg+xml", extensions: ["svg"], confidence: ext === "svg" ? "alta" : "media", analysis: "profundo" };
+  if (/<!doctype\s+html|<html[\s>]/i.test(head) || ["html", "htm"].includes(ext)) return { id: "html", label: "Documento HTML", mime: "text/html", extensions: ["html", "htm"], confidence: ["html", "htm"].includes(ext) ? "alta" : "media", analysis: "profundo" };
   if (scriptExtensions.includes(ext) || /^#!.*\b(?:sh|bash|node|python)\b/m.test(head)) return { id: "script", label: "Script de texto", mime: "text/plain", extensions: scriptExtensions, confidence: scriptExtensions.includes(ext) ? "media" : "alta", analysis: "profundo" };
   const printable = bytes.subarray(0, Math.min(bytes.length, 4096)).reduce((n, b) => n + (b === 9 || b === 10 || b === 13 || (b >= 32 && b < 127) ? 1 : 0), 0);
   if (printable / Math.min(bytes.length, 4096) > 0.85) return { id: "text", label: "Archivo de texto", mime: "text/plain", extensions: ["txt", "csv", "log", "md", "json", "xml", "html", "css"], confidence: "media", analysis: "profundo" };
@@ -47,4 +50,3 @@ export function extensionMatches(type: DetectedType, extension: string): boolean
   if (!extension || type.confidence === "baja") return true;
   return type.extensions.includes(extension);
 }
-

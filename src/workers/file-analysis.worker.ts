@@ -15,11 +15,16 @@ ctx.onmessage = async (event: MessageEvent<WorkerRequest>) => {
     const buffer = await file.arrayBuffer();
     send({ type: "progress", phase: "hashing", label: "Calculando SHA-256" });
     const hash = bytesToHex(await crypto.subtle.digest("SHA-256", buffer));
-    send({ type: "progress", phase: "detecting", label: "Detectando formato" });
+    send({ type: "progress", phase: "detecting", label: "Identificando formato" });
     const started = performance.now();
-    send({ type: "progress", phase: "analyzing", label: "Analizando estructura" });
+    send({ type: "progress", phase: "validating", label: "Validando estructura" });
+    send({ type: "progress", phase: "metadata", label: "Leyendo metadata visible" });
+    send({ type: "progress", phase: "content", label: "Analizando contenido" });
+    send({ type: "progress", phase: "heuristics", label: "Buscando indicadores" });
+    send({ type: "progress", phase: "rules", label: "Aplicando reglas estaticas" });
     const result = analyzeBytes(new Uint8Array(buffer), { name: file.name, type: file.type });
-    send({ type: "progress", phase: "scoring", label: "Evaluando indicadores" });
+    send({ type: "progress", phase: "scoring", label: "Evaluando riesgo" });
+    send({ type: "progress", phase: "result", label: "Preparando resultado" });
     send({ type: "result", result: { ...result, sha256: hash, durationMs: Math.round(performance.now() - started) } });
   } catch {
     send({ type: "error", message: "No pudimos analizar este archivo. Puede estar dañado o usar una estructura no admitida." });
@@ -27,4 +32,3 @@ ctx.onmessage = async (event: MessageEvent<WorkerRequest>) => {
 };
 
 export {};
-

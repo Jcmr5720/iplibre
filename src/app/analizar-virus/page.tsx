@@ -16,7 +16,7 @@ export const metadata: Metadata = pageMetadata({
 const faqs = [
   { q: "¿El archivo se sube a Internet?", a: "No. El archivo se lee y analiza localmente en tu navegador mediante un Web Worker. IPLibre no recibe su nombre, contenido, hash ni resultado, y no guarda historial por defecto." },
   { q: "¿Puede IPLibre confirmar que un archivo no tiene virus?", a: "No. El analisis estatico busca indicadores de riesgo, pero no ejecuta el archivo, no usa una base completa de firmas y no sustituye un antivirus con proteccion en tiempo real y analisis dinamico." },
-  { q: "¿Que archivos puedo analizar?", a: "La deteccion cubre imagenes PNG y JPEG, texto, scripts, PDF, ejecutables PE de Windows, ZIP, documentos Office Open XML y reconoce parcialmente Office antiguo, RAR, 7Z, GZIP, TAR y ELF." },
+  { q: "¿Que archivos puedo analizar?", a: "La deteccion cubre imagenes PNG y JPEG, texto, HTML/SVG, scripts, PDF, ejecutables PE de Windows, ZIP, Office Open XML, APK y JAR. Tambien reconoce parcialmente LNK, Office antiguo, RAR, 7Z, GZIP, TAR y ELF." },
   { q: "¿Que significa Sin indicadores evidentes?", a: "Significa que las comprobaciones disponibles no encontraron señales destacables. No equivale a archivo limpio ni garantiza seguridad: amenazas sofisticadas pueden no dejar señales estaticas." },
   { q: "¿Que hago si aparece riesgo alto?", a: "No abras ni ejecutes el archivo. Confirma el remitente, elimina copias inesperadas y analizalo con una solucion antivirus completa y actualizada antes de decidir que hacer." },
   { q: "¿Por que un archivo legitimo puede mostrar indicadores?", a: "Compresion, cifrado, macros, scripts administrativos o instaladores pueden compartir caracteristicas con archivos maliciosos. Por eso cada indicador explica la evidencia y el resultado se presenta como riesgo, no como diagnostico definitivo." },
@@ -41,17 +41,17 @@ export default function Page() {
         <p>No. La herramienta no contiene una ruta de subida ni consulta una API de reputacion. El archivo, su nombre, su contenido, su hash y el resultado permanecen en la sesion del navegador y desaparecen al recargar. IPLibre tampoco los guarda en localStorage.</p>
 
         <h2>¿Que puede detectar IPLibre?</h2>
-        <p>El motor compara la extension con el formato real, detecta dobles extensiones, ejecutables incrustados, entropia alta y estructuras inconsistentes. Tambien revisa señales propias de ejecutables PE, scripts, PDF, ZIP y documentos Office modernos.</p>
-        <ul><li>En scripts combina ofuscacion, comandos codificados, descargas, ejecucion dinamica y persistencia.</li><li>En PDF busca JavaScript, acciones automaticas, lanzamientos, adjuntos, formularios, enlaces y cifrado.</li><li>En Office detecta macros, objetos incrustados y relaciones externas cuando son visibles en la estructura ZIP.</li><li>En ZIP inspecciona el directorio sin extraer archivos y aplica limites contra bombas de descompresion.</li></ul>
+        <p>El motor compara la extension con el formato real, valida estructuras antes de emitir alertas fuertes, separa riesgo y confianza, y explica la cobertura del analisis. Tambien aplica reglas estaticas correlacionadas para evitar que una palabra aislada pese como una amenaza completa.</p>
+        <ul><li>En scripts combina ofuscacion, comandos codificados, descargas, ejecucion dinamica, LOLBINs y persistencia.</li><li>En PDF busca JavaScript, acciones automaticas, lanzamientos, adjuntos, formularios, enlaces, cifrado y ejecutables PE solo si la estructura PE se valida.</li><li>En PE valida DOS, PE/COFF, optional header, secciones, imports, recursos, overlay, entry point y directorios basicos.</li><li>En Office detecta macros, objetos incrustados, ActiveX, customUI, DDE y relaciones externas cuando son visibles en la estructura ZIP.</li><li>En ZIP inspecciona el directorio central, aplica limites contra bombas y revisa entradas almacenadas sin descomprimir de forma insegura.</li><li>En HTML y SVG realiza analisis estatico sin renderizar el archivo dentro del DOM.</li></ul>
 
         <h2>¿Que no puede detectar?</h2>
         <p>El analisis es estatico: no observa el comportamiento que tendria el archivo al ejecutarse, no emula un sistema operativo y no compara contra una base antivirus completa. Un malware sofisticado puede no mostrar indicadores evidentes, y un archivo legitimo puede activar heuristicas.</p>
 
         <h2>¿Que significa el nivel de riesgo?</h2>
-        <p>Cada indicador suma un peso centralizado segun su relevancia. De 0 a 19 se muestra «Sin indicadores evidentes»; de 20 a 39, «Precaucion»; de 40 a 69, «Riesgo elevado»; y de 70 a 100, «Riesgo alto». Una señal menor aislada no produce por si sola el nivel maximo.</p>
+        <p>Cada indicador tiene severidad y confianza. El score usa deduplicacion, limites por familia y correlaciones para que varias variantes del mismo patron no inflen el resultado. De 0 a 19 se muestra «Sin indicadores evidentes»; de 20 a 39, «Precaucion»; de 40 a 69, «Riesgo elevado»; y de 70 a 100, «Riesgo alto».</p>
 
         <h2>¿Que archivos puedo analizar?</h2>
-        <p>Hay analisis profundo para PDF, PE de Windows, scripts, ZIP y Office Open XML, ademas de comprobaciones generales para texto e imagenes. RAR, 7Z, TAR, GZIP, ELF y Office antiguo se reconocen con analisis parcial. El limite actual es 64 MiB por archivo.</p>
+        <p>Hay analisis profundo para PDF, PE de Windows, scripts, HTML/SVG, ZIP, APK, JAR y Office Open XML, ademas de comprobaciones generales para texto e imagenes. LNK, RAR, 7Z, TAR, GZIP, ELF y Office antiguo se reconocen con analisis parcial. El limite actual es 64 MiB por archivo.</p>
 
         <h2>¿Que hago si aparece riesgo alto?</h2>
         <p>No abras ni ejecutes el archivo para «probarlo». Confirma si esperabas recibirlo, verifica el canal y utiliza una solucion antivirus completa y actualizada. Si el origen es dudoso, elimina el archivo.</p>

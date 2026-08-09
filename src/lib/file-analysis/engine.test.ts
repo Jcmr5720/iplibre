@@ -30,8 +30,20 @@ describe("analizadores y puntuacion", () => {
     expect(result.riskLevel).toMatch(/Riesgo/);
   });
   it("detecta acciones PDF sinteticas", () => {
-    const result = analyzeBytes(encoder.encode("%PDF-1.7\n1 0 obj << /OpenAction 2 0 R /JavaScript /JS (test) /Launch >>"), { name: "prueba.pdf" });
+    const result = analyzeBytes(encoder.encode("%PDF-1.7\n1 0 obj << /OpenAction 2 0 R /JavaScript /JS (test) /Launch >> endobj\n%%EOF"), { name: "prueba.pdf" });
     expect(result.indicators.map((item) => item.id)).toEqual(expect.arrayContaining(["pdf-javascript", "pdf-auto-action", "pdf-launch"]));
+  });
+  it("no marca un PDF legitimo con bytes MZ incidentales como ejecutable incrustado", () => {
+    const result = analyzeBytes(syntheticFixtures.pdfWithIncidentalMz, { name: "normal-con-mz.pdf" });
+    expect(result.indicators.map((item) => item.id)).not.toContain("embedded-executable");
+    expect(result.indicators.map((item) => item.id)).not.toContain("pdf-embedded-pe");
+    expect(result.score).toBeLessThan(20);
+  });
+  it("separa riesgo, confianza y cobertura", () => {
+    const result = analyzeBytes(syntheticFixtures.normalPdf, { name: "normal.pdf" });
+    expect(result.confidence).toBe("alta");
+    expect(result.coverage.items.some((item) => item.label === "Comportamiento en ejecucion" && item.status === "no_analizada")).toBe(true);
+    expect(result.positiveChecks.map((item) => item.id)).toContain("pdf-no-javascript");
   });
   it("usa pesos centralizados y rangos reproducibles", () => {
     expect(scoreIndicators([{ id: "double-extension", severity: "media" }])).toBe(18);

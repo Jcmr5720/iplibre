@@ -24,7 +24,11 @@ test.describe("Analizar virus", () => {
     await page.goto("/analizar-virus");
     await analyze(page);
     await expect(page.getByText("Ejecutable Windows (PE)").first()).toBeVisible();
-    await expect(page.getByText("Nombre con doble extension")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Nombre con doble extension" })).toBeVisible();
+    await expect(page.getByText(/Confianza:/).first()).toBeVisible();
+    await expect(page.getByText(/Cobertura:/).first()).toBeVisible();
+    await expect(page.getByText("Por que obtuve esta puntuacion?")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Verificaciones superadas" })).toBeVisible();
     await expect(page.getByText(/SHA-256/).first()).toBeVisible();
     await expect(page.locator("code")).toHaveText(/^[a-f0-9]{64}$/);
   });
