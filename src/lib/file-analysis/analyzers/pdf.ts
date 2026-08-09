@@ -1,5 +1,6 @@
 import { MAX_EMBEDDED_SCAN_BYTES, MAX_TEXT_BYTES } from "../constants";
 import { indicator } from "../indicator";
+import { evaluateStaticRules, STATIC_RULES } from "../rules";
 import { findEmbeddedPe } from "./pe";
 import type { AnalysisDetails, Indicator, PositiveCheck } from "../types";
 
@@ -79,9 +80,7 @@ export function analyzePdf(bytes: Uint8Array): { indicators: Indicator[]; detail
   if (encrypted) {
     indicators.push(indicator("pdf-encrypted", "baja", "PDF cifrado o protegido", "El cifrado puede impedir que el analisis estatico vea todo el contenido; tambien es una funcion legitima.", "Entrada /Encrypt", "pdf", "Considera el resultado limitado y verifica el origen.", "alta", "pdf"));
   }
-  if (javascriptObjects.length && openActionObjects.length && uriObjects.length) {
-    indicators.push(indicator("pdf-openaction-javascript", "critica", "PDF con apertura automatica, JavaScript y URL externa", "La correlacion es mas relevante que una URL o JavaScript aislados.", `Objetos OpenAction/AA: ${openActionObjects.length}; JS: ${javascriptObjects.length}; URI/GoToR: ${uriObjects.length}`, "pdf", "No abras este PDF hasta revisarlo con una solucion de seguridad completa.", "alta", "pdf"));
-  }
+  indicators.push(...evaluateStaticRules("pdf", { javascript: javascriptObjects.length > 0, autoAction: openActionObjects.length > 0, externalUri: uriObjects.length > 0 }, STATIC_RULES));
 
   if (!javascriptObjects.length) checks.push({ id: "pdf-no-javascript", label: "No encontramos JavaScript declarado" });
   if (!openActionObjects.length) checks.push({ id: "pdf-no-openaction", label: "No encontramos acciones automaticas de apertura" });

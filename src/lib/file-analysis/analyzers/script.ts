@@ -1,5 +1,6 @@
 import { MAX_TEXT_BYTES } from "../constants";
 import { indicator } from "../indicator";
+import { evaluateStaticRules, STATIC_RULES } from "../rules";
 import type { AnalysisDetails, Indicator, PositiveCheck } from "../types";
 
 export type ScriptSignals = {
@@ -50,12 +51,16 @@ export function analyzeScript(bytes: Uint8Array): { indicators: Indicator[]; det
   if (signals.persistence || signals.securityChange) {
     indicators.push(indicator("script-persistence", "alta", "Cambios persistentes o de seguridad", "Se encontraron instrucciones relacionadas con arranque automatico, tareas programadas o desactivacion de defensas.", signals.persistence ? "Mecanismo de persistencia" : "Cambio de configuracion de seguridad", "script", "Verifica cada comando y evita ejecutarlo en tu sistema principal.", "alta", "script"));
   }
-  if (signals.encodedCommand && signals.longBase64 && signals.download && signals.execution) {
-    indicators.push(indicator("script-powershell-download-chain", "critica", "Cadena PowerShell codificada con descarga y ejecucion", "La correlacion combina comando codificado, carga remota y ejecucion. Es mas fuerte que cada senal aislada.", "PowerShell + EncodedCommand + URL/descarga + ejecucion", "script", "No ejecutes este script en tu equipo principal.", "alta", "script"));
-  }
-  if (signals.lolbinRemote) {
-    indicators.push(indicator("script-lolbin-remote", "alta", "Uso remoto de binarios del sistema", "Se detecto certutil, mshta, regsvr32 o rundll32 con contexto remoto o de decodificacion.", "LOLBIN con URL o decodificacion", "script", "Tratalo como sospechoso salvo que conozcas exactamente su finalidad.", "alta", "script"));
-  }
+  indicators.push(...evaluateStaticRules("script", {
+    longBase64: signals.longBase64,
+    encodedCommand: signals.encodedCommand,
+    dynamicExecution: signals.dynamicExecution,
+    download: signals.download,
+    execution: signals.execution,
+    persistence: signals.persistence,
+    securityChange: signals.securityChange,
+    lolbinRemote: signals.lolbinRemote,
+  }, STATIC_RULES));
 
   if (!signals.encodedCommand) checks.push({ id: "script-no-encoded-command", label: "No encontramos PowerShell codificado" });
   if (!signals.download || !signals.execution) checks.push({ id: "script-no-download-execute", label: "No encontramos descarga y ejecucion combinadas" });
