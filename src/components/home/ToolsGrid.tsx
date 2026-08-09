@@ -44,7 +44,7 @@ export function ToolsByCategory() {
   return (
     <div className="space-y-10">
       {toolCategories.map((cat) => (
-        <section key={cat.id}>
+        <section key={cat.id} id={cat.id} className="scroll-mt-28">
           <h2 className="mb-4 text-lg font-semibold tracking-tight text-foreground">{cat.title}</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cat.items.map((tool) => (

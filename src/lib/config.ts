@@ -26,8 +26,8 @@ export const siteConfig = {
   slogan: "Descubre tu IP y mide la velocidad de tu Internet",
   description:
     "IPLibre es una plataforma gratuita de diagnóstico de Internet: consulta tu IP pública, mide la velocidad de tu conexión y analiza DNS, WHOIS, RDAP, ASN y geolocalización de IP.",
-  // La URL canónica se resuelve en tiempo de ejecución (ver getBaseUrl).
-  url: process.env.NEXT_PUBLIC_SITE_URL || CANONICAL_URL,
+  // La URL canónica pública es siempre el dominio oficial.
+  url: CANONICAL_URL,
   locale: "es",
   themeColor: {
     light: "#0e7490",
@@ -57,20 +57,8 @@ export const siteConfig = {
   ],
 } as const;
 
-/**
- * Resuelve la URL base en tiempo de ejecución. En Vercel usa VERCEL_URL
- * (deployment) o VERCEL_PROJECT_PRODUCTION_URL (producción) si no hay una
- * URL pública configurada explícitamente.
- */
 export function getBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
-  // En producción, la canónica es siempre el dominio oficial (nunca el
-  // *.vercel.app), aunque falte la variable de entorno.
-  if (process.env.VERCEL_ENV === "production") return CANONICAL_URL;
-  // En deployments de preview usa la URL del deployment para poder navegar.
-  const vercel = process.env.VERCEL_URL;
-  if (vercel) return `https://${vercel}`;
-  return "http://localhost:3000";
+  return CANONICAL_URL;
 }
 
 export type ToolCategory = "conexion" | "red" | "web" | "seguridad";

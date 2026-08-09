@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getBaseUrl } from "@/lib/config";
 
 /** Genera metadata coherente por página (título, descripción, canónica, OG). */
 export function pageMetadata({
@@ -10,14 +11,15 @@ export function pageMetadata({
   description: string;
   path: string;
 }): Metadata {
+  const url = `${getBaseUrl()}${path}`;
   return {
     title,
     description,
-    alternates: { canonical: path },
+    alternates: { canonical: url },
     openGraph: {
       title,
       description,
-      url: path,
+      url,
       type: "website",
     },
     twitter: {

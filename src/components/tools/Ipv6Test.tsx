@@ -95,14 +95,24 @@ export function Ipv6Test() {
     setPhase("");
   }, []);
 
-  React.useEffect(() => {
-    run();
-  }, [run]);
-
   const compat = result ? compatCopy[result.compat] : null;
 
   return (
     <div className="space-y-6">
+      {!loading && !result && (
+        <Card>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Comprueba desde tu navegador si tu conexión puede alcanzar destinos IPv4 e IPv6. La
+              prueba contacta endpoints específicos por familia de IP y puede tardar unos segundos.
+            </p>
+            <Button onClick={run}>
+              <RefreshCw className="h-4 w-4" /> Iniciar test IPv6
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {loading && (
         <Card>
           <CardContent className="flex items-center gap-3">

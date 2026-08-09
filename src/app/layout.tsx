@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   authors: [{ name: siteConfig.author }],
   creator: siteConfig.author,
   manifest: "/manifest.webmanifest",
-  alternates: { canonical: "/" },
+  alternates: { canonical: baseUrl },
   openGraph: {
     type: "website",
     locale: "es_ES",

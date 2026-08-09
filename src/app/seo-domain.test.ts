@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { CANONICAL_URL, getBaseUrl, siteConfig, tools } from "@/lib/config";
 import sitemap from "./sitemap";
 import robots from "./robots";
+import nextConfig from "../../next.config";
 
 const CANONICAL = "https://iplibre.online";
 
@@ -29,8 +30,8 @@ describe("getBaseUrl", () => {
     expect(getBaseUrl()).toBe(CANONICAL);
   });
 
-  it("NEXT_PUBLIC_SITE_URL tiene prioridad absoluta", () => {
-    process.env.NEXT_PUBLIC_SITE_URL = CANONICAL;
+  it("ignora overrides de entorno para senales canonicas", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://www.iplibre.online";
     process.env.VERCEL_ENV = "production";
     expect(getBaseUrl()).toBe(CANONICAL);
   });
@@ -90,5 +91,27 @@ describe("robots.txt", () => {
       Array.isArray(rule.disallow) ? rule.disallow : rule.disallow ? [rule.disallow] : [],
     );
     expect(disallow).toContain("/api/");
+  });
+});
+
+describe("redirects de dominio", () => {
+  it("mantiene reglas permanentes para www y dominio legacy hacia el apex canonico", async () => {
+    const redirects = typeof nextConfig.redirects === "function" ? await nextConfig.redirects() : [];
+    expect(redirects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          source: "/:path*",
+          destination: `${CANONICAL}/:path*`,
+          permanent: true,
+          has: expect.arrayContaining([expect.objectContaining({ type: "host", value: "www.iplibre.online" })]),
+        }),
+        expect.objectContaining({
+          source: "/:path*",
+          destination: `${CANONICAL}/:path*`,
+          permanent: true,
+          has: expect.arrayContaining([expect.objectContaining({ type: "host", value: "iplibre.vercel.app" })]),
+        }),
+      ]),
+    );
   });
 });

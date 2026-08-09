@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { BreadcrumbsJsonLd } from "@/components/seo/JsonLd";
 import { cn } from "@/lib/utils";
+import { toolByPath } from "@/lib/routes";
 
 export function Container({
   className,
@@ -76,9 +77,29 @@ export function ToolPage({
   breadcrumbs: Crumb[];
   children: React.ReactNode;
 }) {
+  const last = breadcrumbs[breadcrumbs.length - 1];
+  const tool = last ? toolByPath(last.path) : undefined;
+  const categoryName =
+    tool?.category === "conexion"
+      ? "Mi conexión"
+      : tool?.category === "red"
+        ? "Dominios y red"
+        : tool?.category === "web"
+          ? "Sitios web"
+          : tool?.category === "seguridad"
+            ? "Seguridad y utilidades"
+            : undefined;
+  const enhancedBreadcrumbs =
+    tool && categoryName
+      ? [
+          { name: "Herramientas", path: "/herramientas" },
+          { name: categoryName, path: `/herramientas#${tool.category}` },
+          ...breadcrumbs,
+        ]
+      : breadcrumbs;
   return (
     <Container className="py-8 sm:py-10">
-      <Breadcrumbs items={breadcrumbs} />
+      <Breadcrumbs items={enhancedBreadcrumbs} />
       {children}
     </Container>
   );

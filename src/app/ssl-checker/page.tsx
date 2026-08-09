@@ -66,7 +66,7 @@ export default function Page() {
         links={[
           { href: "/estado-web", label: "Estado web", description: "¿La página está disponible?" },
           { href: "/headers-seguridad", label: "Headers de seguridad", description: "Protecciones HTTP" },
-          { href: "/whois", label: "WHOIS / RDAP", description: "Datos de registro del dominio" },
+          { href: "/redirect-checker", label: "Redirect Checker", description: "Cadena HTTP/HTTPS" },
         ]}
       />
     </ToolPage>
