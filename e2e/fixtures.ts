@@ -309,6 +309,7 @@ export const VIEWPORTS = [
 export const TOOL_ROUTES = [
   "/mi-ip",
   "/test-de-velocidad",
+  "/analizar-virus",
   "/diagnostico-de-internet",
   "/test-ipv6",
   "/webrtc-leak-test",

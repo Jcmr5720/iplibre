@@ -82,6 +82,8 @@ export function ToolPage({
   const categoryName =
     tool?.category === "conexion"
       ? "Mi conexión"
+      : tool?.category === "privacidad"
+        ? "Privacidad"
       : tool?.category === "red"
         ? "Dominios y red"
         : tool?.category === "web"

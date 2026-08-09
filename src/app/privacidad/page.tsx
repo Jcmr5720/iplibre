@@ -67,6 +67,13 @@ export default function Page() {
         conectividad. Enviamos solo la consulta necesaria para devolver el resultado solicitado.
       </p>
 
+      <h2>Analisis local de archivos</h2>
+      <p>
+        En Analizar virus, el archivo se procesa exclusivamente en tu navegador. IPLibre no recibe
+        el archivo, su nombre, su contenido, su hash SHA-256 ni el resultado, y no conserva un
+        historial por defecto. Los datos desaparecen al recargar o cerrar la pagina.
+      </p>
+
       <h2>Contacto, donaciones y correo</h2>
       <p>
         Si envias el formulario de contacto, procesamos el contenido que escribes para responderte.

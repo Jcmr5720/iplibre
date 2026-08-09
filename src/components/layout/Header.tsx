@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ExternalLink,
   FileText,
+  FileSearch,
   Gauge,
   Globe2,
   Grid3x3,
@@ -336,7 +337,7 @@ export function Header() {
         </div>
       </div>
 
-      <nav aria-label="Accesos rápidos" className="grid grid-cols-2 border-t border-border bg-background/95 lg:hidden">
+      <nav aria-label="Accesos rápidos" className="grid grid-cols-3 border-t border-border bg-background/95 lg:hidden">
         <Link
           href="/mi-ip"
           className={cn(
@@ -356,6 +357,16 @@ export function Header() {
         >
           <Gauge className="h-4 w-4" aria-hidden />
           Velocidad
+        </Link>
+        <Link
+          href="/analizar-virus"
+          className={cn(
+            "flex h-11 items-center justify-center gap-1.5 border-l border-border text-xs font-medium sm:text-sm",
+            pathname === "/analizar-virus" ? "text-primary" : "text-foreground",
+          )}
+        >
+          <FileSearch className="h-4 w-4" aria-hidden />
+          Analizar virus
         </Link>
       </nav>
 

@@ -1,5 +1,6 @@
 import {
   Activity,
+  FileSearch,
   Gauge,
   Globe2,
   KeyRound,
@@ -24,6 +25,7 @@ import {
 export const TOOL_ICONS: Record<string, React.ElementType> = {
   "/mi-ip": Globe2,
   "/test-de-velocidad": Gauge,
+  "/analizar-virus": FileSearch,
   "/diagnostico-de-internet": Stethoscope,
   "/test-ipv6": Network,
   "/webrtc-leak-test": Wifi,

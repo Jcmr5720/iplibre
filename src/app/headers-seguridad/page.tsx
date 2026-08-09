@@ -68,6 +68,7 @@ export default function Page() {
           { href: "/ssl-checker", label: "SSL Checker", description: "Certificado HTTPS del dominio" },
           { href: "/estado-web", label: "Estado web", description: "¿La página responde?" },
           { href: "/dns-lookup", label: "DNS Lookup", description: "Registros DNS del dominio" },
+          { href: "/analizar-virus", label: "Analizar virus", description: "Analisis local de archivos sospechosos" },
         ]}
       />
     </ToolPage>

@@ -5,9 +5,9 @@ import { pageMetadata } from "@/lib/seo";
 import { tools } from "@/lib/config";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Herramientas de red — IP, velocidad, DNS, WHOIS, SSL y más",
+  title: "Herramientas online — IP, velocidad, archivos, DNS y seguridad",
   description:
-    "Todas las herramientas de IPLibre para diagnosticar tu conexión y sitios web: mi IP, test de velocidad, IPv6, WebRTC, geolocalización, WHOIS/RDAP, DNS, DNSSEC, listas negras, SSL, headers, redirecciones, SPF/DKIM/DMARC y generador de contraseñas.",
+    "Todas las herramientas de IPLibre para consultar tu IP, medir velocidad, analizar archivos localmente y diagnosticar DNS, privacidad, sitios web y seguridad.",
   path: "/herramientas",
 });
 
@@ -17,7 +17,7 @@ export default function Page() {
       <PageHeader
         eyebrow="Catálogo"
         title="Todas las herramientas"
-        description={`${tools.length} utilidades de diagnóstico de red y sitios web, cada una con consultas reales a fuentes públicas y resultados que puedes verificar.`}
+        description={`${tools.length} utilidades de conexión, red, archivos y seguridad. Las herramientas locales procesan los datos en tu dispositivo; las consultas de red usan fuentes públicas verificables.`}
       />
       <ToolsByCategory />
     </ToolPage>

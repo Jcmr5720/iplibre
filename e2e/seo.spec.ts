@@ -28,6 +28,7 @@ test.describe("SEO y verificaciones", () => {
       ["/generador-contrasenas", "/generador-contrasenas"],
       ["/webrtc-leak-test", "/webrtc-leak-test"],
       ["/dnssec-checker", "/dnssec-checker"],
+      ["/analizar-virus", "/analizar-virus"],
     ] as const) {
       await page.goto(route);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(

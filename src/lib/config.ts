@@ -23,9 +23,9 @@ export const verification = {
 
 export const siteConfig = {
   name: "IPLibre",
-  slogan: "Descubre tu IP y mide la velocidad de tu Internet",
+  slogan: "Conoce tu IP, mide tu conexión y analiza archivos sospechosos",
   description:
-    "IPLibre es una plataforma gratuita de diagnóstico de Internet: consulta tu IP pública, mide la velocidad de tu conexión y analiza DNS, WHOIS, RDAP, ASN y geolocalización de IP.",
+    "IPLibre ofrece herramientas gratuitas para consultar tu IP, medir tu conexión y analizar archivos sospechosos localmente, además de diagnósticos DNS, web y de seguridad.",
   // La URL canónica pública es siempre el dominio oficial.
   url: CANONICAL_URL,
   locale: "es",
@@ -54,6 +54,8 @@ export const siteConfig = {
     "asn lookup",
     "reverse dns",
     "diagnóstico de internet",
+    "analizar virus",
+    "analizar archivo sospechoso",
   ],
 } as const;
 
@@ -61,7 +63,7 @@ export function getBaseUrl(): string {
   return CANONICAL_URL;
 }
 
-export type ToolCategory = "conexion" | "red" | "web" | "seguridad";
+export type ToolCategory = "conexion" | "privacidad" | "red" | "web" | "seguridad";
 
 export type NavItem = {
   href: string;
@@ -75,9 +77,10 @@ export type NavItem = {
 export const tools: NavItem[] = [
   { href: "/mi-ip", label: "Mi IP", description: "Consulta tu dirección IP pública.", category: "conexion", keywords: ["ip", "ip publica", "mi direccion", "ipv4", "cual es mi ip", "direccion ip"] },
   { href: "/test-de-velocidad", label: "Test de velocidad", description: "Mide descarga, subida y latencia.", category: "conexion", keywords: ["velocidad", "speed test", "descarga", "subida", "ping", "jitter", "mbps", "internet", "banda ancha"] },
+  { href: "/analizar-virus", label: "Analizar virus", description: "Revisa archivos localmente sin subirlos.", category: "seguridad", keywords: ["virus", "malware", "analizar archivo", "archivo sospechoso", "escanear", "sha-256", "seguridad", "antivirus"] },
   { href: "/diagnostico-de-internet", label: "Diagnóstico", description: "Analiza el estado de tu conexión.", category: "conexion", keywords: ["diagnostico", "conexion", "estado", "internet", "problemas", "chequeo"] },
-  { href: "/test-ipv6", label: "Test IPv6", description: "Comprueba compatibilidad IPv6.", category: "conexion", keywords: ["ipv6", "ip", "compatibilidad", "protocolo", "ipv4 vs ipv6"] },
-  { href: "/webrtc-leak-test", label: "WebRTC Leak Test", description: "¿Tu navegador filtra tu IP?", category: "conexion", keywords: ["webrtc", "fuga", "leak", "vpn", "ip", "privacidad", "navegador", "ice", "stun", "filtracion"] },
+  { href: "/test-ipv6", label: "Test IPv6", description: "Comprueba compatibilidad IPv6.", category: "privacidad", keywords: ["ipv6", "ip", "compatibilidad", "protocolo", "ipv4 vs ipv6"] },
+  { href: "/webrtc-leak-test", label: "WebRTC Leak Test", description: "¿Tu navegador filtra tu IP?", category: "privacidad", keywords: ["webrtc", "fuga", "leak", "vpn", "ip", "privacidad", "navegador", "ice", "stun", "filtracion"] },
   { href: "/geolocalizar-ip", label: "Geolocalizar IP", description: "Ubicación aproximada de una IP.", category: "red", keywords: ["ip", "geolocalizacion", "ubicacion", "geo", "localizar", "pais", "ciudad", "mapa"] },
   { href: "/whois", label: "WHOIS / RDAP", description: "Datos de dominios, IP y ASN.", category: "red", keywords: ["whois", "rdap", "dominio", "registro", "propietario", "titular"] },
   { href: "/dns-lookup", label: "DNS Lookup", description: "Registros A, AAAA, MX, TXT y más.", category: "red", keywords: ["dns", "registros", "lookup", "resolver", "mx", "txt", "nameserver", "dominio"] },
@@ -99,7 +102,7 @@ export const tools: NavItem[] = [
  * navegación (estilo PDFLibre). El resto vive en el mega-menú "Todas las
  * herramientas". Fuente única de verdad: cambiar los href aquí reordena el header.
  */
-export const primaryTools: NavItem[] = ["/mi-ip", "/test-de-velocidad"]
+export const primaryTools: NavItem[] = ["/mi-ip", "/test-de-velocidad", "/analizar-virus"]
   .map((href) => tools.find((t) => t.href === href))
   .filter((t): t is NavItem => Boolean(t));
 
@@ -111,8 +114,9 @@ export const primaryTools: NavItem[] = ["/mi-ip", "/test-de-velocidad"]
 export const featuredTools: NavItem[] = [
   "/mi-ip",
   "/test-de-velocidad",
-  "/webrtc-leak-test",
+  "/analizar-virus",
   "/test-ipv6",
+  "/webrtc-leak-test",
   "/diagnostico-de-internet",
   "/geolocalizar-ip",
   "/whois",
@@ -126,6 +130,7 @@ export const featuredTools: NavItem[] = [
 /** Herramientas agrupadas por categoría, para el menú y /herramientas. */
 export const toolCategories: { id: ToolCategory; title: string; items: NavItem[] }[] = [
   { id: "conexion", title: "Mi conexión", items: tools.filter((t) => t.category === "conexion") },
+  { id: "privacidad", title: "Privacidad", items: tools.filter((t) => t.category === "privacidad") },
   { id: "red", title: "Dominios y red", items: tools.filter((t) => t.category === "red") },
   { id: "web", title: "Sitios web", items: tools.filter((t) => t.category === "web") },
   { id: "seguridad", title: "Seguridad y utilidades", items: tools.filter((t) => t.category === "seguridad") },
@@ -225,6 +230,10 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
   {
     title: "Mi conexión",
     items: tools.filter((t) => t.category === "conexion"),
+  },
+  {
+    title: "Privacidad",
+    items: tools.filter((t) => t.category === "privacidad"),
   },
   {
     title: "Dominios y red",

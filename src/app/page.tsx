@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Gauge, Globe2, Lock, ShieldCheck, Zap } from "lucide-react";
+import { FileSearch, Gauge, Globe2, Lock, ShieldCheck, Zap } from "lucide-react";
 import { Container } from "@/components/layout/PageShell";
 import { ButtonLink } from "@/components/ui/Button";
 import { HeroIp } from "@/components/home/HeroIp";
@@ -26,12 +26,12 @@ export default function Home() {
                 <Zap className="h-3.5 w-3.5 text-primary" /> Diagnóstico de Internet gratuito
               </span>
               <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
-                Conoce tu IP, analiza tu conexión y comprueba tu privacidad
+                Conoce tu IP, mide tu conexión y analiza archivos sospechosos
               </h1>
               <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-                {siteConfig.name} reúne todo lo que necesitas para diagnosticar tu conexión: IP,
-                velocidad, latencia, privacidad WebRTC, DNS, WHOIS/RDAP, ASN y geolocalización. Datos reales, sin
-                registro y respetando tu privacidad.
+                {siteConfig.name} reúne herramientas para consultar tu IP, medir velocidad y revisar
+                indicadores de riesgo en archivos sin subirlos. También puedes diagnosticar WebRTC,
+                DNS, WHOIS/RDAP, ASN y sitios web.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <ButtonLink href="/mi-ip" size="lg">
@@ -39,6 +39,9 @@ export default function Home() {
                 </ButtonLink>
                 <ButtonLink href="/test-de-velocidad" size="lg" variant="outline">
                   <Gauge className="h-5 w-5" /> Test de velocidad
+                </ButtonLink>
+                <ButtonLink href="/analizar-virus" size="lg" variant="outline">
+                  <FileSearch className="h-5 w-5" /> Analizar virus
                 </ButtonLink>
               </div>
               <Link href="/webrtc-leak-test" className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
@@ -68,7 +71,7 @@ export default function Home() {
       <Container className="py-14">
         <div className="mb-8 grid gap-3 lg:grid-cols-3">
           {featuredTools.slice(0, 3).map((tool, index) => {
-            const Icon = tool.href === "/mi-ip" ? Globe2 : tool.href === "/test-de-velocidad" ? Gauge : ShieldCheck;
+            const Icon = tool.href === "/mi-ip" ? Globe2 : tool.href === "/test-de-velocidad" ? Gauge : FileSearch;
             return (
               <Link
                 key={tool.href}
@@ -91,8 +94,8 @@ export default function Home() {
           <div>
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Herramientas destacadas</h2>
             <p className="mt-2 text-muted-foreground">
-              Diagnóstico de tu conexión y de sitios web, con consultas reales y resultados
-              verificables. Y muchas más en el catálogo completo.
+              Conexión, archivos y seguridad con resultados explicables. Y muchas más en el
+              catálogo completo.
             </p>
           </div>
           <Link href="/herramientas" className="text-sm font-medium text-primary hover:underline">
